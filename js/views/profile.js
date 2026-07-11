@@ -154,8 +154,9 @@ function buildRatingWidget() {
   function render() {
     starsEl.innerHTML = "";
     for (let i = 1; i <= 5; i++) {
-      const btn = el("button", { class: `star-btn ${i <= currentRating ? "filled" : ""}`, "data-star": i }, [
-        el("i", { class: `fa-${i <= currentRating ? "solid" : "regular"} fa-star` })
+      const isFilled = i <= currentRating;
+      const btn = el("button", { class: `star-btn ${isFilled ? "filled" : ""}`, "data-star": i }, [
+        el("span", { class: `material-symbols-rounded ${isFilled ? "filled" : ""}`, style: "font-size:26px;" }, "star")
       ]);
       btn.addEventListener("click", () => {
         currentRating = i;
@@ -171,7 +172,7 @@ function buildRatingWidget() {
   render();
 
   return el("div", { class: "card" }, [
-    el("div", { class: "card-header" }, [el("h3", {}, [el("i", { class: "fa-solid fa-star" }), " Rate Our Service"])]),
+    el("div", { class: "card-header" }, [el("h3", {}, [el("span", { class: "material-symbols-rounded filled", style: "color:var(--brass-500);margin-right:6px;font-size:16px;" }, "star"), " Rate Our Service"])]),
     el("p", { class: "muted small", style: "text-align:center;" }, "How would you rate your SACCO experience?"),
     starsEl,
     commentEl,
