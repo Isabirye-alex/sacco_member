@@ -1,14 +1,14 @@
 import { api } from "../api.js";
 import { getCurrentUser, getCurrentMember } from "../auth.js";
-import { el, mount, formatDate, titleCase, showToast } from "../utils.js";
+import { el, mount, formatDate, titleCase, showToast, openModal } from "../utils.js";
 
 export async function renderProfile(root) {
   const user = getCurrentUser();
   const member = getCurrentMember();
 
   const accountCard = el("div", { class: "card" }, [
-    el("h3", {}, "Account"),
-    infoRow("Email", user.email),
+    el("div", { class: "card-header" }, [el("h3", {}, [el("i", { class: "fa-solid fa-circle-user" }), " Account"])]),
+    infoRow("Email", [el("i", { class: "fa-regular fa-envelope", style: "margin-right:5px;color:var(--brass-500);" }), user.email]),
     infoRow("Full name", user.full_name),
     infoRow("Role", titleCase(user.role)),
   ]);
@@ -18,39 +18,36 @@ export async function renderProfile(root) {
   if (member) {
     sections.push(
       el("div", { class: "card" }, [
-        el("h3", {}, "Member profile"),
-        infoRow("Member number", member.member_number),
+        el("div", { class: "card-header" }, [el("h3", {}, [el("i", { class: "fa-solid fa-id-card" }), " Member Profile"])]),
+        infoRow("Member number", [el("b", {}, member.member_number)]),
         infoRow("National ID", member.national_id),
-        infoRow("Phone", member.phone_number),
+        infoRow("Phone", [el("i", { class: "fa-solid fa-phone", style: "margin-right:5px;color:var(--brass-500);" }), member.phone_number]),
         infoRow("Status", titleCase(member.status)),
         infoRow("Date joined", formatDate(member.date_joined)),
-        infoRow("Occupation", member.occupation || "\u2014"),
-        infoRow("Address", member.physical_address || "\u2014"),
+        infoRow("Occupation", member.occupation || "—"),
+        infoRow("Address", member.physical_address || "—"),
       ])
     );
 
     if (member.next_of_kin?.length) {
-      sections.push(
-        el("div", { class: "card" }, [
-          el("h3", {}, "Next of kin"),
-          ...member.next_of_kin.map((k) =>
-            el("div", { style: "padding:8px 0;border-bottom:1px solid var(--line)" }, [
-              el("div", { style: "font-weight:600" }, k.full_name),
-              el("div", { class: "muted small" }, `${titleCase(k.relationship_type)} \u00b7 ${k.phone_number}`),
-            ])
-          ),
-        ])
-      );
+      // F16: Beneficiary Share Splitter
+      sections.push(buildBeneficiarySplitter(member.next_of_kin));
     }
 
     if (member.trusted_contacts?.length) {
       sections.push(
         el("div", { class: "card" }, [
-          el("h3", {}, "Trusted contacts"),
+          el("div", { class: "card-header" }, [el("h3", {}, [el("i", { class: "fa-solid fa-user-shield" }), " Trusted Contacts"])]),
           ...member.trusted_contacts.map((c) =>
             el("div", { style: "padding:8px 0;border-bottom:1px solid var(--line)" }, [
-              el("div", { style: "font-weight:600" }, c.full_name),
-              el("div", { class: "muted small" }, c.phone_number),
+              el("div", { style: "display:flex;align-items:center;gap:8px;" }, [
+                el("i", { class: "fa-solid fa-user-check", style: "color:var(--pine-700);" }),
+                el("span", { style: "font-weight:600" }, c.full_name),
+              ]),
+              el("div", { class: "muted small", style: "padding-left:24px;margin-top:2px;" }, [
+                el("i", { class: "fa-solid fa-phone", style: "margin-right:4px;" }),
+                c.phone_number
+              ]),
             ])
           ),
         ])
@@ -60,41 +57,169 @@ export async function renderProfile(root) {
 
   sections.push(buildPasswordCard());
 
+  // F17: Star Rating Widget
+  sections.push(buildRatingWidget());
+
   mount(root, sections);
 }
 
 function infoRow(label, value) {
-  return el("div", { style: "display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line)" }, [
-    el("span", { class: "muted" }, label),
-    el("span", { style: "font-weight:600" }, value),
+  const valueEl = typeof value === "string" || typeof value === "number"
+    ? el("span", { style: "font-weight:600" }, String(value))
+    : el("span", { style: "font-weight:600;display:flex;align-items:center;" }, Array.isArray(value) ? value : [value]);
+  return el("div", { style: "display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)" }, [
+    el("span", { class: "muted small" }, label),
+    valueEl,
+  ]);
+}
+
+/* ── F16: Beneficiary Share Splitter ─────────────────────── */
+function buildBeneficiarySplitter(nextOfKin) {
+  const PREF_KEY = "sacco_beneficiary_splits";
+  let splits;
+  try { splits = JSON.parse(localStorage.getItem(PREF_KEY)) || {}; } catch { splits = {}; }
+
+  // Initialize with equal split if not set
+  const count = nextOfKin.length;
+  const defaultPct = Math.floor(100 / count);
+  nextOfKin.forEach((k, i) => {
+    if (splits[k.full_name] === undefined) {
+      splits[k.full_name] = i === count - 1 ? 100 - defaultPct * (count - 1) : defaultPct;
+    }
+  });
+
+  const card = el("div", { class: "card" });
+  card.appendChild(el("div", { class: "card-header" }, [
+    el("h3", {}, [el("i", { class: "fa-solid fa-scale-balanced" }), " Beneficiary Share Splitter"]),
+    el("span", { class: "muted small" }, "Must total 100%")
+  ]));
+
+  const totalEl = el("div", { class: "beneficiary-total ok" });
+  const rowsEl = el("div", {});
+
+  function updateTotal() {
+    const total = Object.values(splits).reduce((a, b) => a + b, 0);
+    totalEl.className = `beneficiary-total ${total === 100 ? "ok" : "warn"}`;
+    totalEl.innerHTML = `
+      <span>${total === 100 ? '<i class="fa-solid fa-circle-check"></i>' : '<i class="fa-solid fa-triangle-exclamation"></i>'} Total allocation</span>
+      <span style="font-family:var(--font-ledger);font-size:17px;">${total}%</span>
+    `;
+    localStorage.setItem(PREF_KEY, JSON.stringify(splits));
+  }
+
+  nextOfKin.forEach(k => {
+    const pctLbl = el("span", { class: "beneficiary-pct" }, `${splits[k.full_name]}%`);
+    const slider = el("input", { type: "range", min: "0", max: "100", step: "1", value: splits[k.full_name], style: "flex:1;" });
+    slider.addEventListener("input", () => {
+      splits[k.full_name] = +slider.value;
+      pctLbl.textContent = `${slider.value}%`;
+      updateTotal();
+    });
+    rowsEl.appendChild(el("div", { class: "beneficiary-row" }, [
+      el("div", { style: "display:flex;flex-direction:column;min-width:100px;" }, [
+        el("div", { class: "beneficiary-name" }, [el("i", { class: "fa-solid fa-user", style: "color:var(--brass-500);margin-right:5px;font-size:11px;" }), k.full_name]),
+        el("div", { style: "font-size:11px;color:var(--ink-400);" }, titleCase(k.relationship_type))
+      ]),
+      slider,
+      pctLbl
+    ]));
+  });
+
+  updateTotal();
+  card.appendChild(rowsEl);
+  card.appendChild(totalEl);
+  card.appendChild(el("div", { style: "margin-top:12px;" }, [
+    el("button", { class: "btn btn-primary btn-sm", onclick: () => { updateTotal(); showToast("Beneficiary splits saved! 📋", "success"); } }, [
+      el("i", { class: "fa-solid fa-floppy-disk" }), " Save Splits"
+    ])
+  ]));
+
+  return card;
+}
+
+/* ── F17: Star Rating Widget ─────────────────────────────── */
+function buildRatingWidget() {
+  const PREF_KEY = "sacco_service_rating";
+  let currentRating = +localStorage.getItem(PREF_KEY) || 0;
+  const comments = ["", "Very poor — needs urgent improvement.", "Below expectations.", "Acceptable — some areas need work.", "Good experience overall!", "Excellent! 🌟 Thank you for your feedback!"];
+
+  const starsEl = el("div", { class: "star-rating", style: "justify-content:center;margin:12px 0;" });
+  const commentEl = el("div", { class: "rating-comment" }, comments[currentRating]);
+  const submitBtn = el("button", { class: "btn btn-primary btn-sm", style: "display:block;margin:10px auto 0;", onclick: () => {
+    if (!currentRating) { showToast("Please select a star rating first.", "warn"); return; }
+    localStorage.setItem(PREF_KEY, currentRating);
+    showToast(`Thank you! You rated us ${currentRating} star${currentRating > 1 ? "s" : ""} ⭐`, "success");
+  }}, [el("i", { class: "fa-solid fa-paper-plane" }), " Submit Rating"]);
+
+  function render() {
+    starsEl.innerHTML = "";
+    for (let i = 1; i <= 5; i++) {
+      const btn = el("button", { class: `star-btn ${i <= currentRating ? "filled" : ""}`, "data-star": i }, [
+        el("i", { class: `fa-${i <= currentRating ? "solid" : "regular"} fa-star` })
+      ]);
+      btn.addEventListener("click", () => {
+        currentRating = i;
+        commentEl.textContent = comments[i];
+        btn.classList.add("animate");
+        setTimeout(() => btn.classList.remove("animate"), 400);
+        render();
+      });
+      starsEl.appendChild(btn);
+    }
+  }
+
+  render();
+
+  return el("div", { class: "card" }, [
+    el("div", { class: "card-header" }, [el("h3", {}, [el("i", { class: "fa-solid fa-star" }), " Rate Our Service"])]),
+    el("p", { class: "muted small", style: "text-align:center;" }, "How would you rate your SACCO experience?"),
+    starsEl,
+    commentEl,
+    submitBtn
   ]);
 }
 
 function buildPasswordCard() {
   const errorEl = el("p", { class: "form-error", hidden: true });
-
+  const submitBtn = el("button", { type: "submit", class: "btn btn-primary" }, [
+    el("i", { class: "fa-solid fa-lock" }), " Update Password"
+  ]);
   const form = el("form", { style: "max-width:360px" }, [
-    el("div", { class: "field" }, [el("label", {}, "Current password"), el("input", { type: "password", id: "current-password", required: true })]),
-    el("div", { class: "field" }, [el("label", {}, "New password"), el("input", { type: "password", id: "new-password", required: true, minlength: 8 })]),
+    el("div", { class: "field" }, [
+      el("label", {}, [el("i", { class: "fa-solid fa-unlock", style: "margin-right:5px;color:var(--brass-500);" }), "Current password"]),
+      el("input", { type: "password", id: "current-password", required: true })
+    ]),
+    el("div", { class: "field" }, [
+      el("label", {}, [el("i", { class: "fa-solid fa-lock", style: "margin-right:5px;color:var(--brass-500);" }), "New password"]),
+      el("input", { type: "password", id: "new-password", required: true, minlength: 8 })
+    ]),
     errorEl,
-    el("button", { type: "submit", class: "btn btn-primary" }, "Update password"),
+    submitBtn,
   ]);
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     errorEl.hidden = true;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Updating…';
     try {
       await api.post("/api/v1/auth/change-password", {
         current_password: form.querySelector("#current-password").value,
         new_password: form.querySelector("#new-password").value,
       });
-      showToast("Password updated.", "success");
+      showToast("Password updated successfully! 🔒", "success");
       form.reset();
     } catch (err) {
       errorEl.textContent = err.message;
       errorEl.hidden = false;
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Update Password';
     }
   });
 
-  return el("div", { class: "card" }, [el("h3", {}, "Change password"), form]);
+  return el("div", { class: "card" }, [
+    el("div", { class: "card-header" }, [el("h3", {}, [el("i", { class: "fa-solid fa-key" }), " Change Password"])]),
+    form
+  ]);
 }

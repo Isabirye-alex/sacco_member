@@ -54,11 +54,11 @@ function buildAccountCard(account, memberId) {
     el("button", {
       class: "btn btn-primary btn-sm",
       onclick: () => openMobileMoneyModal("deposit", account, memberId),
-    }, "Deposit via Mobile Money"),
+    }, [el("i", { class: "fa-solid fa-arrow-down-to-line" }), " Deposit via Mobile Money"]),
     el("button", {
       class: "btn btn-secondary btn-sm",
       onclick: () => openMobileMoneyModal("withdraw", account, memberId),
-    }, "Withdraw via Mobile Money"),
+    }, [el("i", { class: "fa-solid fa-arrow-up-from-line" }), " Withdraw via Mobile Money"]),
     el(
       "button",
       {
@@ -68,7 +68,7 @@ function buildAccountCard(account, memberId) {
           showTransactionsModal(account, txns);
         },
       },
-      "View transactions"
+      [el("i", { class: "fa-solid fa-list" }), " View transactions"]
     ),
   ]);
   card.appendChild(actions);
@@ -209,11 +209,20 @@ function showTransactionsModal(account, txns) {
         exportToCSV(`transactions_${account.account_number}.csv`, headers, rows);
         showToast("CSV exported successfully", "success");
       }
-    }, "📥 Export CSV");
+    }, [el("i", { class: "fa-solid fa-file-csv" }), " Export CSV"]);
 
-    const filterRow = el("div", {
-      style: "display:flex; gap:8px; margin-bottom:12px; align-items:center; flex-wrap:wrap; width:100%"
-    }, [searchInput, typeSelect, exportBtn]);
+    const filterRow = el("div", { class: "search-filter-bar" }, [
+      el("div", { class: "search-icon-wrap" }, [
+        el("i", { class: "fa-solid fa-magnifying-glass" }),
+        el("input", {
+          type: "text",
+          placeholder: "Search transactions…",
+          oninput: (e) => { searchInput.value = e.target.value; applyFilters(); }
+        })
+      ]),
+      typeSelect,
+      exportBtn
+    ]);
 
     const tbody = el("tbody", {});
 

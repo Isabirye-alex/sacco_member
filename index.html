@@ -4,6 +4,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>SACCO Member Portal</title>
+<meta name="description" content="Manage your SACCO savings, loans, shares, and groups — all in one secure member portal." />
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<!-- FontAwesome 6 Free -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -12,21 +19,21 @@
   <div id="login-screen" class="auth-screen">
     <div class="auth-card">
       <div class="brand">
-        <div class="brand-mark">S</div>
+        <div class="brand-mark"><i class="fa-solid fa-piggy-bank"></i></div>
         <h1>SACCO Member Portal</h1>
       </div>
       <p class="muted">Sign in to manage your savings, loans, and shares.</p>
       <form id="login-form">
-        <label>Email
+        <label><i class="fa-regular fa-envelope label-icon"></i> Email
           <input type="email" id="login-email" required autocomplete="username" />
         </label>
-        <label>Password
+        <label><i class="fa-solid fa-lock label-icon"></i> Password
           <input type="password" id="login-password" required autocomplete="current-password" />
         </label>
         <div style="display:flex; justify-content:flex-end; margin-top:-6px; margin-bottom:12px;">
-          <a href="#" id="forgot-password-link" class="forgot-password-link">Forgot password?</a>
+          <a href="#" id="forgot-password-link" class="forgot-password-link"><i class="fa-solid fa-rotate-left"></i> Forgot password?</a>
         </div>
-        <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+        <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-right-to-bracket"></i> Sign in</button>
         <p id="login-error" class="form-error" hidden></p>
       </form>
     </div>
@@ -36,31 +43,33 @@
   <div id="app-shell" hidden>
     <aside class="sidebar">
       <div class="brand brand-sidebar">
-        <div class="brand-mark">S</div>
+        <div class="brand-mark"><i class="fa-solid fa-piggy-bank"></i></div>
         <span>SACCO</span>
       </div>
       <nav id="nav-links">
-        <a href="#/dashboard" data-route="dashboard">Dashboard</a>
-        <a href="#/savings" data-route="savings">Savings</a>
-        <a href="#/loans" data-route="loans">Loans</a>
-        <a href="#/shares" data-route="shares">Shares</a>
-        <a href="#/groups" data-route="groups">Groups</a>
-        <a href="#/notifications" data-route="notifications">Notifications</a>
-        <a href="#/profile" data-route="profile">Profile</a>
+        <a href="#/dashboard" data-route="dashboard"><i class="fa-solid fa-gauge-high nav-icon"></i>Dashboard</a>
+        <a href="#/savings" data-route="savings"><i class="fa-solid fa-vault nav-icon"></i>Savings</a>
+        <a href="#/loans" data-route="loans"><i class="fa-solid fa-hand-holding-dollar nav-icon"></i>Loans</a>
+        <a href="#/shares" data-route="shares"><i class="fa-solid fa-chart-pie nav-icon"></i>Shares</a>
+        <a href="#/groups" data-route="groups"><i class="fa-solid fa-people-group nav-icon"></i>Groups</a>
+        <a href="#/notifications" data-route="notifications"><i class="fa-solid fa-bell nav-icon"></i>Notifications</a>
+        <a href="#/tools" data-route="tools"><i class="fa-solid fa-screwdriver-wrench nav-icon"></i>Member Tools</a>
+        <a href="#/profile" data-route="profile"><i class="fa-solid fa-circle-user nav-icon"></i>Profile</a>
       </nav>
       <div class="sidebar-footer">
         <div id="user-chip" class="user-chip"></div>
         <button id="theme-toggle-btn" class="theme-switch-btn">
-          <span class="theme-icon">☀️</span>
+          <span class="theme-icon"><i class="fa-solid fa-sun"></i></span>
           <span class="theme-label">Light Mode</span>
         </button>
-        <button id="logout-btn" class="btn btn-ghost btn-block" style="margin-top:6px;">Log out</button>
+        <button id="lock-session-btn" class="btn btn-ghost btn-block" style="margin-top:6px; color: var(--brass-500);"><i class="fa-solid fa-shield-halved"></i> Lock Session</button>
+        <button id="logout-btn" class="btn btn-ghost btn-block" style="margin-top:4px;"><i class="fa-solid fa-right-from-bracket"></i> Log out</button>
       </div>
     </aside>
 
     <div class="main-col">
       <header class="topbar">
-        <button id="menu-toggle" class="icon-btn" aria-label="Toggle menu">&#9776;</button>
+        <button id="menu-toggle" class="icon-btn" aria-label="Toggle menu"><i class="fa-solid fa-bars"></i></button>
         <h2 id="page-title">Dashboard</h2>
         <div id="connection-indicator" class="conn-badge online">
           <span class="dot"></span>
@@ -71,6 +80,58 @@
         <!-- view content injected here -->
       </main>
     </div>
+  </div>
+
+  <!-- Lock Screen Overlay -->
+  <div id="lock-screen" class="lock-screen" hidden>
+    <div class="lock-card">
+      <div class="lock-icon-wrap"><i class="fa-solid fa-lock"></i></div>
+      <h2>Session Locked</h2>
+      <p class="muted">Enter your 4-digit PIN to resume.</p>
+      <div class="pin-display" id="pin-display">
+        <span class="pin-dot" id="pd0"></span>
+        <span class="pin-dot" id="pd1"></span>
+        <span class="pin-dot" id="pd2"></span>
+        <span class="pin-dot" id="pd3"></span>
+      </div>
+      <p class="pin-error" id="pin-error" hidden><i class="fa-solid fa-triangle-exclamation"></i> Incorrect PIN. Try again.</p>
+      <div class="pin-pad" id="pin-pad">
+        <button class="pin-btn" data-digit="1">1</button>
+        <button class="pin-btn" data-digit="2">2</button>
+        <button class="pin-btn" data-digit="3">3</button>
+        <button class="pin-btn" data-digit="4">4</button>
+        <button class="pin-btn" data-digit="5">5</button>
+        <button class="pin-btn" data-digit="6">6</button>
+        <button class="pin-btn" data-digit="7">7</button>
+        <button class="pin-btn" data-digit="8">8</button>
+        <button class="pin-btn" data-digit="9">9</button>
+        <button class="pin-btn pin-btn-clear" id="pin-clear"><i class="fa-solid fa-delete-left"></i></button>
+        <button class="pin-btn" data-digit="0">0</button>
+        <div></div>
+      </div>
+      <p class="muted small" style="margin-top:12px;"><i class="fa-solid fa-circle-info"></i> Default PIN: 1234</p>
+    </div>
+  </div>
+
+  <!-- Chatbot widget -->
+  <div id="chatbot-widget" class="chatbot-widget" hidden>
+    <div id="chatbot-panel" class="chatbot-panel" hidden>
+      <div class="chatbot-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <i class="fa-solid fa-robot" style="font-size:18px;color:var(--brass-500);"></i>
+          <span style="font-weight:600;">SACCO Assistant</span>
+        </div>
+        <button id="chatbot-close" class="chatbot-close-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chat-msg bot-msg"><i class="fa-solid fa-robot chat-avatar"></i><span>Hello! I'm your SACCO virtual assistant. Ask me about your savings, loans, shares, or financial tips! 🌿</span></div>
+      </div>
+      <div class="chatbot-input-row">
+        <input id="chatbot-input" type="text" placeholder="Type a message…" />
+        <button id="chatbot-send"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </div>
+    <button id="chatbot-toggle" class="chatbot-fab" title="SACCO Assistant"><i class="fa-solid fa-robot"></i></button>
   </div>
 
   <div id="toast-root" class="toast-root"></div>

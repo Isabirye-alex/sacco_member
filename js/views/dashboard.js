@@ -1,6 +1,6 @@
 import { api } from "../api.js";
 import { getCurrentUser, getCurrentMember, requireMemberProfile } from "../auth.js";
-import { el, mount, formatMoney, formatDate, badge, titleCase, renderSkeleton } from "../utils.js";
+import { el, mount, formatMoney, formatDate, badge, titleCase, renderSkeleton, openModal, showToast } from "../utils.js";
 import { goTo } from "../router.js";
 
 export async function renderDashboard(root) {
@@ -48,32 +48,44 @@ export async function renderDashboard(root) {
   const totalShares = holdings.reduce((sum, h) => sum + Number(h.number_of_shares || 0), 0);
   const totalSharesVal = totalShares * 10000; // Assuming mock share valuation of 10,000 UGX per share
 
-  const welcomeCard = el("div", { class: "card" }, [
-    el("h3", {}, `Welcome back, ${member ? member.first_name : user.full_name.split(" ")[0]}`),
-    el("p", { class: "muted" }, member
-      ? `Member No. ${member.member_number} · Joined ${formatDate(member.date_joined)} · ${titleCase(member.status)}`
-      : "Loading your member profile…"),
+  const ticker = buildNewsTicker();
+
+  const welcomeCard = el("div", { class: "card", style: "display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;" }, [
+    el("div", {}, [
+      el("h3", {}, [
+        el("i", { class: "fa-solid fa-hand-wave", style: "color:var(--brass-500);margin-right:8px;" }),
+        `Welcome back, ${member ? member.first_name : user.full_name.split(" ")[0]}`
+      ]),
+      el("p", { class: "muted", style: "margin:0" }, member
+        ? `Member No. ${member.member_number} · Joined ${formatDate(member.date_joined)} · ${titleCase(member.status)}`
+        : "Loading your member profile…"),
+    ]),
+    el("button", { class: "btn btn-secondary btn-sm", onclick: () => showBadgesModal(accounts, loans, totalShares) }, [
+      el("i", { class: "fa-solid fa-trophy" }),
+      " My Badges"
+    ])
   ]);
 
   const quickActions = buildQuickActions();
 
   const statCards = el("div", { class: "grid grid-3", style: "margin-top:16px" }, [
-    statCard("Total Savings", formatMoney(totalSavings), `${accounts.length} account${accounts.length === 1 ? "" : "s"}`),
-    statCard("Active Loans", `${activeLoans.length}`, activeLoans.length ? `${formatMoney(totalOutstanding)} approved` : "No active loans"),
-    statCard("Shares Held", `${totalShares}`, `${holdings.length} product${holdings.length === 1 ? "" : "s"}`),
+    statCard("Total Savings", formatMoney(totalSavings), `${accounts.length} account${accounts.length === 1 ? "" : "s"}`, "fa-vault"),
+    statCard("Active Loans", `${activeLoans.length}`, activeLoans.length ? `${formatMoney(totalOutstanding)} approved` : "No active loans", "fa-hand-holding-dollar"),
+    statCard("Shares Held", `${totalShares}`, `${holdings.length} product${holdings.length === 1 ? "" : "s"}`, "fa-chart-pie"),
   ]);
 
   const recentAccountsCard = buildAccountsPreview(accounts);
   const recentLoansCard = buildLoansPreview(loans);
   
   const portfolioChartCard = el("div", { class: "card" }, [
-    el("h3", {}, "Financial Portfolio Allocation"),
+    el("div", { class: "card-header" }, [el("h3", {}, [el("i", { class: "fa-solid fa-chart-donut" }), " Portfolio Allocation"])]),
     buildPortfolioChart(totalSavings, totalOutstanding, totalSharesVal)
   ]);
 
   const activityTimelineCard = buildActivityTimeline(accounts, loans);
 
   mount(root, [
+    ticker,
     welcomeCard, 
     quickActions, 
     statCards, 
@@ -82,13 +94,13 @@ export async function renderDashboard(root) {
   ]);
 }
 
-function statCard(label, value, sub) {
+function statCard(label, value, sub, iconClass) {
   return el("div", { class: "card stat-card interactive", onclick: () => {
     if (label.includes("Savings")) goTo("/savings");
     else if (label.includes("Loans")) goTo("/loans");
     else if (label.includes("Shares")) goTo("/shares");
   }}, [
-    el("div", { class: "label" }, label),
+    el("div", { class: "label" }, [iconClass ? el("i", { class: `fa-solid ${iconClass}` }) : null, label].filter(Boolean)),
     el("div", { class: "value ledger" }, value),
     el("div", { class: "sub" }, sub),
   ]);
@@ -96,14 +108,76 @@ function statCard(label, value, sub) {
 
 function buildQuickActions() {
   return el("div", { class: "card", style: "margin-top:16px" }, [
-    el("h3", { style: "margin-bottom:12px" }, "Quick Actions"),
-    el("div", { style: "display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;" }, [
-      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/savings") }, "💰 Savings Portal"),
-      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/loans") }, "📝 Apply for Loan"),
-      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/groups") }, "👥 Table Banking"),
-      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/profile") }, "👤 Update Password"),
+    el("div", { class: "card-header" }, [el("h3", {}, [el("i", { class: "fa-solid fa-bolt" }), " Quick Actions"])]),
+    el("div", { style: "display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:12px;" }, [
+      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/savings") }, [el("i", { class: "fa-solid fa-vault" }), " Savings Portal"]),
+      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/loans") }, [el("i", { class: "fa-solid fa-hand-holding-dollar" }), " Apply for Loan"]),
+      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/groups") }, [el("i", { class: "fa-solid fa-people-group" }), " Table Banking"]),
+      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/tools") }, [el("i", { class: "fa-solid fa-screwdriver-wrench" }), " Member Tools"]),
+      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/profile") }, [el("i", { class: "fa-solid fa-key" }), " Update Password"]),
     ])
   ]);
+}
+
+/* ── F12: News Ticker ─────────────────────────────────────── */
+function buildNewsTicker() {
+  const announcements = [
+    { icon: "fa-bell", text: "SACCO AGM scheduled for August 30th — all members expected to attend." },
+    { icon: "fa-chart-line", text: "Q2 dividends of 14% approved and will be credited to share accounts by July 25th." },
+    { icon: "fa-hand-holding-dollar", text: "Emergency loan limit increased to UGX 10,000,000 for active members." },
+    { icon: "fa-piggy-bank", text: "New Fixed Deposit product launched — earn up to 16% p.a. on savings above UGX 2M." },
+    { icon: "fa-trophy", text: "Top Savers of Q2 will be awarded at the next member meeting — keep saving!" },
+    { icon: "fa-shield-halved", text: "System upgrade on Saturday 2:00–4:00 AM EAT. Portal may be temporarily unavailable." },
+  ];
+  const track = el("div", { class: "ticker-track" });
+  // Double the items so the scroll feels seamless
+  [...announcements, ...announcements].forEach(a => {
+    track.appendChild(el("span", { class: "ticker-item" }, [
+      el("i", { class: `fa-solid ${a.icon}` }),
+      " " + a.text
+    ]));
+  });
+  return el("div", { class: "news-ticker", style: "margin-bottom:16px;" }, [
+    el("div", { class: "ticker-label" }, [el("i", { class: "fa-solid fa-satellite-dish" }), " SACCO NEWS"]),
+    el("div", { class: "ticker-track-wrap" }, [track])
+  ]);
+}
+
+/* ── F13: Achievement Badges Modal ───────────────────────── */
+function showBadgesModal(accounts, loans, shares) {
+  const badgeDefinitions = [
+    { name: "First Saver", desc: "Open a savings account", icon: "fa-piggy-bank", color: "var(--success)", unlocked: accounts.length > 0 },
+    { name: "Loan Seeker", desc: "Apply for your first loan", icon: "fa-hand-holding-dollar", color: "var(--pine-700)", unlocked: loans.length > 0 },
+    { name: "Shareholder", desc: "Hold at least 1 share", icon: "fa-chart-pie", color: "var(--brass-500)", unlocked: shares > 0 },
+    { name: "Multi-Saver", desc: "Open 3+ savings accounts", icon: "fa-vault", color: "var(--pine-800)", unlocked: accounts.length >= 3 },
+    { name: "Diversified", desc: "Have savings, loan & shares", icon: "fa-layer-group", color: "var(--brass-600)", unlocked: accounts.length > 0 && loans.length > 0 && shares > 0 },
+    { name: "Active Member", desc: "Log in 5+ times", icon: "fa-star", color: "var(--warn)", unlocked: +localStorage.getItem("sacco_login_count") >= 5 },
+    { name: "Power User", desc: "Use Member Tools", icon: "fa-screwdriver-wrench", color: "var(--pine-700)", unlocked: !!localStorage.getItem("sacco_savings_goals") || !!localStorage.getItem("sacco_journal") },
+    { name: "Goal Setter", desc: "Add a savings goal", icon: "fa-bullseye", color: "var(--danger)", unlocked: (() => { try { return JSON.parse(localStorage.getItem("sacco_savings_goals") || "[]").length > 0; } catch { return false; } })() },
+    { name: "Journaler", desc: "Write a financial journal entry", icon: "fa-book-open", color: "var(--brass-500)", unlocked: (() => { try { return JSON.parse(localStorage.getItem("sacco_journal") || "[]").length > 0; } catch { return false; } })() },
+  ];
+
+  const unlocked = badgeDefinitions.filter(b => b.unlocked).length;
+
+  openModal("🏆 My Achievement Badges", (close) => {
+    const grid = el("div", { class: "badges-grid" });
+    badgeDefinitions.forEach(b => {
+      grid.appendChild(el("div", { class: `badge-item ${b.unlocked ? "unlocked" : "locked"}` }, [
+        el("i", { class: `fa-solid ${b.icon}`, style: `color:${b.unlocked ? b.color : "var(--ink-400)"};font-size:28px;` }),
+        el("div", { class: "badge-name" }, b.name),
+        el("div", { class: "badge-desc" }, b.desc),
+        b.unlocked ? el("span", { style: "font-size:10px;color:var(--success);font-weight:700;" }, "✓ Unlocked") : el("span", { style: "font-size:10px;color:var(--ink-400);" }, "🔒 Locked")
+      ]));
+    });
+    return [el("div", {}, [
+      el("p", { class: "muted small", style: "margin-bottom:14px;" }, [
+        el("i", { class: "fa-solid fa-trophy", style: "color:var(--brass-500);margin-right:6px;" }),
+        `${unlocked} of ${badgeDefinitions.length} badges unlocked`
+      ]),
+      grid,
+      el("div", { class: "modal-actions" }, [el("button", { class: "btn btn-primary", onclick: close }, "Close")])
+    ])];
+  });
 }
 
 function buildAccountsPreview(accounts) {
