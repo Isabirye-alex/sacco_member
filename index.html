@@ -75,7 +75,12 @@
     <div class="main-col">
       <header class="topbar">
         <button id="menu-toggle" class="icon-btn" aria-label="Toggle menu"><i class="fa-solid fa-bars"></i></button>
-        <h2 id="page-title">Dashboard</h2>
+        <div class="global-search-wrap">
+          <span class="material-symbols-rounded search-icon">search</span>
+          <input id="global-search" type="text" placeholder="Search savings, loans, tools…" autocomplete="off" />
+          <div id="global-search-results" class="global-search-dropdown" hidden></div>
+        </div>
+        <h2 id="page-title" class="topbar-title-mobile">Dashboard</h2>
         <div id="connection-indicator" class="conn-badge online">
           <span class="dot"></span>
           <span class="text">Connected</span>

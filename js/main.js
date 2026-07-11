@@ -38,6 +38,7 @@ function renderUserChip() {
 
 async function bootstrap() {
   initTheme();
+  initGlobalSearch();
   initConnectivityMonitor();
   initForgotPassword();
   initLockScreen();
@@ -83,6 +84,123 @@ function updateThemeButton(theme) {
     icon.innerHTML = '<i class="fa-solid fa-sun"></i>';
     label.textContent = "Light Mode";
   }
+}
+
+/* ── Global Search ────────────────────────────────────────── */
+const SEARCHABLE_ROUTES = [
+  { path: "/dashboard", label: "Dashboard", icon: "dashboard", keywords: ["home", "overview", "summary"] },
+  { path: "/savings", label: "Savings", icon: "savings", keywords: ["accounts", "deposit", "withdraw", "balance"] },
+  { path: "/loans", label: "Loans", icon: "request_quote", keywords: ["apply", "borrow", "repayment", "guarantor"] },
+  { path: "/shares", label: "Shares", icon: "trending_up", keywords: ["dividends", "holdings"] },
+  { path: "/groups", label: "Groups", icon: "groups", keywords: ["table banking", "contributions", "chama"] },
+  { path: "/notifications", label: "Notifications", icon: "notifications", keywords: ["alerts", "sms", "email", "preferences"] },
+  { path: "/tools", label: "Member Tools", icon: "construction", keywords: ["calculator", "budget", "journal", "currency", "health", "goals"] },
+  { path: "/profile", label: "My Profile", icon: "person", keywords: ["password", "settings", "account", "beneficiary", "rating"] },
+];
+
+function initGlobalSearch() {
+  const input = document.getElementById("global-search");
+  const dropdown = document.getElementById("global-search-results");
+  if (!input || !dropdown) return;
+
+  let activeIndex = -1;
+  let currentResults = [];
+
+  function closeDropdown() {
+    dropdown.hidden = true;
+    dropdown.innerHTML = "";
+    activeIndex = -1;
+    currentResults = [];
+  }
+
+  function renderResults(results, query) {
+    dropdown.innerHTML = "";
+    currentResults = results;
+    activeIndex = -1;
+
+    if (!results.length) {
+      dropdown.appendChild(el("div", { class: "search-empty" }, `No results for "${query}"`));
+      dropdown.hidden = false;
+      return;
+    }
+
+    results.forEach((r, idx) => {
+      const item = el("a", { class: "search-result-item", href: `#${r.path}`, "data-index": idx }, [
+        el("span", { class: "material-symbols-rounded" }, r.icon),
+        el("div", {}, [
+          el("div", { class: "sr-label" }, r.label),
+          el("div", { class: "sr-sub" }, r.keywords.slice(0, 3).join(" • ") || "Navigate"),
+        ]),
+      ]);
+      item.addEventListener("click", (e) => {
+        e.preventDefault();
+        goTo(r.path);
+        refreshCurrentRoute();
+        input.value = "";
+        closeDropdown();
+      });
+      dropdown.appendChild(item);
+    });
+    dropdown.hidden = false;
+  }
+
+  input.addEventListener("input", () => {
+    const q = input.value.trim().toLowerCase();
+    if (!q) { closeDropdown(); return; }
+
+    const matches = SEARCHABLE_ROUTES.filter((r) => {
+      if (r.label.toLowerCase().includes(q)) return true;
+      return r.keywords.some((k) => k.includes(q));
+    });
+    renderResults(matches, q);
+  });
+
+  input.addEventListener("keydown", (e) => {
+    if (!currentResults.length) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      activeIndex = (activeIndex + 1) % currentResults.length;
+      updateActiveItem();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      activeIndex = (activeIndex - 1 + currentResults.length) % currentResults.length;
+      updateActiveItem();
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (activeIndex >= 0 && activeIndex < currentResults.length) {
+        const r = currentResults[activeIndex];
+        goTo(r.path);
+        refreshCurrentRoute();
+        input.value = "";
+        closeDropdown();
+      }
+    } else if (e.key === "Escape") {
+      input.value = "";
+      closeDropdown();
+      input.blur();
+    }
+  });
+
+  function updateActiveItem() {
+    const items = dropdown.querySelectorAll(".search-result-item");
+    items.forEach((it, idx) => {
+      it.classList.toggle("active", idx === activeIndex);
+    });
+    if (activeIndex >= 0 && items[activeIndex]) {
+      items[activeIndex].scrollIntoView({ block: "nearest" });
+    }
+  }
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".global-search-wrap")) {
+      closeDropdown();
+    }
+  });
+
+  window.addEventListener("hashchange", () => {
+    input.value = "";
+    closeDropdown();
+  });
 }
 
 /* ── Connectivity Monitor ───────────────────────────────── */
