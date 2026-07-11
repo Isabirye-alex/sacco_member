@@ -521,9 +521,6 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
 
 document.getElementById("logout-btn").addEventListener("click", () => { logout(); });
 
-const footerYear = document.getElementById("footer-year");
-if (footerYear) footerYear.textContent = new Date().getFullYear();
-
 document.getElementById("menu-toggle").addEventListener("click", () => {
   const sidebar = document.querySelector(".sidebar");
   const appShell = document.getElementById("app-shell");
