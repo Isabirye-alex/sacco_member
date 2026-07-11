@@ -20,7 +20,7 @@ export async function renderShares(root) {
   const totalShares = holdings.reduce((sum, h) => sum + Number(h.number_of_shares || 0), 0);
 
   const summary = el("div", { class: "card stat-card" }, [
-    el("div", { class: "label" }, "Total shares held"),
+    el("div", { class: "label" }, [el("span", { class: "material-symbols-rounded filled", style: "color:var(--brass-500);margin-right:6px;font-size:16px;" }, "trending_up"), "Total shares held"]),
     el("div", { class: "value ledger" }, `${totalShares}`),
   ]);
 

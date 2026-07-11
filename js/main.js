@@ -127,7 +127,7 @@ function initForgotPassword() {
     e.preventDefault();
     openModal("Reset Password", (closeFn) => {
       const emailInput = el("input", { type: "email", required: true, placeholder: "Enter your registered email", style: "width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--paper);" });
-      const submitBtn = el("button", { type: "submit", class: "btn btn-primary" }, [el("i", { class: "fa-solid fa-paper-plane" }), " Send Reset Link"]);
+      const submitBtn = el("button", { type: "submit", class: "btn btn-primary" }, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "send"), " Send Reset Link"]);
       const container = el("div", {}, [
         el("p", { class: "muted" }, "Enter your email address and we'll send you a password reset code."),
         el("form", {}, [
@@ -156,7 +156,7 @@ function renderVerificationStage(container, email, closeFn) {
   clearNode(container);
   const codeInput = el("input", { type: "text", required: true, placeholder: "e.g. 123456", maxlength: "6", style: "width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--paper);" });
   const newPassInput = el("input", { type: "password", required: true, placeholder: "Min 8 characters", minlength: 8, style: "width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--paper);" });
-  const submitBtn = el("button", { type: "submit", class: "btn btn-primary" }, [el("i", { class: "fa-solid fa-lock" }), " Reset Password"]);
+  const submitBtn = el("button", { type: "submit", class: "btn btn-primary" }, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "lock_reset"), " Reset Password"]);
   const form = el("form", {}, [
     el("p", { class: "muted" }, `Enter the 6-digit code sent to ${email} and your new password.`),
     el("div", { class: "field" }, [el("label", {}, "Verification Code"), codeInput]),
@@ -397,13 +397,47 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
     errorEl.hidden = false;
   } finally {
     submitBtn.disabled = false;
-    submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign in';
+    submitBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:15px;vertical-align:-2px;margin-right:4px;">login</span> Sign in';
   }
 });
 
 document.getElementById("logout-btn").addEventListener("click", () => { logout(); });
 document.getElementById("menu-toggle").addEventListener("click", () => {
-  document.querySelector(".sidebar").classList.toggle("open");
+  const sidebar = document.querySelector(".sidebar");
+  const appShell = document.getElementById("app-shell");
+  const overlay = document.getElementById("sidebar-overlay");
+  sidebar.classList.toggle("open");
+  if (window.innerWidth <= 780) {
+    appShell.classList.toggle("sidebar-open");
+    if (overlay) {
+      overlay.classList.toggle("visible");
+      if (sidebar.classList.contains("open")) {
+        overlay.style.pointerEvents = "auto";
+      } else {
+        overlay.style.pointerEvents = "none";
+      }
+    }
+  }
+});
+
+document.getElementById("sidebar-overlay")?.addEventListener("click", () => {
+  const sidebar = document.querySelector(".sidebar");
+  const appShell = document.getElementById("app-shell");
+  sidebar.classList.remove("open");
+  appShell.classList.remove("sidebar-open");
+  const overlay = document.getElementById("sidebar-overlay");
+  if (overlay) overlay.classList.remove("visible");
+});
+
+window.addEventListener("resize", () => {
+  if (window.innerWidth > 780) {
+    const sidebar = document.querySelector(".sidebar");
+    const appShell = document.getElementById("app-shell");
+    sidebar.classList.remove("open");
+    appShell.classList.remove("sidebar-open");
+    const overlay = document.getElementById("sidebar-overlay");
+    if (overlay) overlay.classList.remove("visible");
+  }
 });
 
 bootstrap();

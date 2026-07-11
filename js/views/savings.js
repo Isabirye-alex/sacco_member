@@ -54,11 +54,11 @@ function buildAccountCard(account, memberId) {
     el("button", {
       class: "btn btn-primary btn-sm",
       onclick: () => openMobileMoneyModal("deposit", account, memberId),
-    }, [el("i", { class: "fa-solid fa-arrow-down-to-line" }), " Deposit via Mobile Money"]),
+    }, [el("span", { class: "material-symbols-rounded", style: "font-size:14px;vertical-align:-2px;margin-right:4px;" }, "arrow_downward"), " Deposit"]),
     el("button", {
       class: "btn btn-secondary btn-sm",
       onclick: () => openMobileMoneyModal("withdraw", account, memberId),
-    }, [el("i", { class: "fa-solid fa-arrow-up-from-line" }), " Withdraw via Mobile Money"]),
+    }, [el("span", { class: "material-symbols-rounded", style: "font-size:14px;vertical-align:-2px;margin-right:4px;" }, "arrow_upward"), " Withdraw"]),
     el(
       "button",
       {

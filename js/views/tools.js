@@ -223,11 +223,11 @@ function buildSavingsGoalTracker() {
             goals.push({ name: nameI.value, target: +targetI.value, saved: +savedI.value || 0, icon: icons[goals.length % icons.length] });
             saveGoals(goals); renderGoals(); close();
             showToast(`Goal "${nameI.value}" added! 🎯`, "success");
-          }}, [el("i", { class: "fa-solid fa-plus" }), " Add Goal"])
+          }}, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "add"), " Add Goal"])
         ])
       ])];
     });
-  }}, [el("i", { class: "fa-solid fa-plus" }), " Add Goal"]);
+  }}, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "add"), " Add Goal"]);
 
   renderGoals();
   return toolCard("fa-bullseye", "Savings Goal Tracker", "Track & visualize your financial goals", [listEl, addBtn]);
@@ -577,7 +577,7 @@ function buildJournal() {
     entries.push({ text: textarea.value.trim(), ts: Date.now() });
     save(entries); textarea.value = ""; render();
     showToast("Journal entry saved! 📖", "success");
-  }}, [el("i", { class: "fa-solid fa-floppy-disk" }), " Save Entry"]);
+  }}, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "save"), " Save Entry"]);
 
   render();
   return toolCard("fa-book-open", "Financial Journal", "Private notes — stored locally", [listEl, textarea, saveBtn]);

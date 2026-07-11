@@ -9,6 +9,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<!-- Material Icons (Outlined + Filled) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 <!-- FontAwesome 6 Free -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <link rel="stylesheet" href="css/style.css" />
@@ -19,21 +22,23 @@
   <div id="login-screen" class="auth-screen">
     <div class="auth-card">
       <div class="brand">
-        <div class="brand-mark"><i class="fa-solid fa-piggy-bank"></i></div>
+        <div class="brand-mark"><span class="material-symbols-rounded filled">savings</span></div>
         <h1>SACCO Member Portal</h1>
       </div>
       <p class="muted">Sign in to manage your savings, loans, and shares.</p>
-      <form id="login-form">
-        <label><i class="fa-regular fa-envelope label-icon"></i> Email
-          <input type="email" id="login-email" required autocomplete="username" />
-        </label>
-        <label><i class="fa-solid fa-lock label-icon"></i> Password
-          <input type="password" id="login-password" required autocomplete="current-password" />
-        </label>
+        <form id="login-form">
+          <label>
+            <span class="material-symbols-rounded label-icon">mail</span> Email
+            <input type="email" id="login-email" required autocomplete="username" />
+          </label>
+          <label>
+            <span class="material-symbols-rounded label-icon">lock</span> Password
+            <input type="password" id="login-password" required autocomplete="current-password" />
+          </label>
         <div style="display:flex; justify-content:flex-end; margin-top:-6px; margin-bottom:12px;">
-          <a href="#" id="forgot-password-link" class="forgot-password-link"><i class="fa-solid fa-rotate-left"></i> Forgot password?</a>
+          <a href="#" id="forgot-password-link" class="forgot-password-link"><span class="material-symbols-rounded" style="font-size:14px;vertical-align:-2px;margin-right:4px;">refresh</span> Forgot password?</a>
         </div>
-        <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-right-to-bracket"></i> Sign in</button>
+        <button type="submit" class="btn btn-primary btn-block"><span class="material-symbols-rounded" style="font-size:15px;vertical-align:-2px;margin-right:4px;">login</span> Sign in</button>
         <p id="login-error" class="form-error" hidden></p>
       </form>
     </div>
@@ -43,7 +48,7 @@
   <div id="app-shell" hidden>
     <aside class="sidebar">
       <div class="brand brand-sidebar">
-        <div class="brand-mark"><i class="fa-solid fa-piggy-bank"></i></div>
+        <div class="brand-mark"><span class="material-symbols-rounded filled">savings</span></div>
         <span>SACCO</span>
       </div>
       <nav id="nav-links">
@@ -80,6 +85,7 @@
         <!-- view content injected here -->
       </main>
     </div>
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
   </div>
 
   <!-- Lock Screen Overlay -->
@@ -129,8 +135,8 @@
       <div class="chatbot-input-row">
         <input id="chatbot-input" type="text" placeholder="Type a message…" />
         <button id="chatbot-send"><i class="fa-solid fa-paper-plane"></i></button>
-      </div>
     </div>
+  </div>
     <button id="chatbot-toggle" class="chatbot-fab" title="SACCO Assistant"><i class="fa-solid fa-robot"></i></button>
   </div>
 

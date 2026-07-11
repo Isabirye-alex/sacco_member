@@ -72,7 +72,7 @@ function showGroupDetailsModal(membership, myContributions, total) {
         exportToCSV(`contributions_${membership.group_name.replace(/\s+/g, '_')}.csv`, headers, rows);
         showToast("Contributions log exported successfully", "success");
       }
-    }, "📥 Export CSV");
+    }, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "download"), " Export CSV"]);
 
     const statSection = el("div", { class: "calculator-preview", style: "margin-bottom:16px;" }, [
       el("div", { class: "calc-title" }, "Group Contributions Summary"),

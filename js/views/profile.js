@@ -8,9 +8,9 @@ export async function renderProfile(root) {
 
   const accountCard = el("div", { class: "card" }, [
     el("div", { class: "card-header" }, [el("h3", {}, [el("i", { class: "fa-solid fa-circle-user" }), " Account"])]),
-    infoRow("Email", [el("i", { class: "fa-regular fa-envelope", style: "margin-right:5px;color:var(--brass-500);" }), user.email]),
-    infoRow("Full name", user.full_name),
-    infoRow("Role", titleCase(user.role)),
+    infoRow("Email", [el("span", { class: "material-symbols-rounded", style: "color:var(--brass-500);margin-right:6px;font-size:16px;" }, "mail"), user.email]),
+    infoRow("Full name", [el("span", { class: "material-symbols-rounded", style: "color:var(--brass-500);margin-right:6px;font-size:16px;vertical-align:-3px;" }, "person"), user.full_name]),
+    infoRow("Role", [el("span", { class: "material-symbols-rounded", style: "color:var(--brass-500);margin-right:6px;font-size:16px;vertical-align:-3px;" }, "badge"), titleCase(user.role)]),
   ]);
 
   const sections = [accountCard];
@@ -21,8 +21,8 @@ export async function renderProfile(root) {
         el("div", { class: "card-header" }, [el("h3", {}, [el("i", { class: "fa-solid fa-id-card" }), " Member Profile"])]),
         infoRow("Member number", [el("b", {}, member.member_number)]),
         infoRow("National ID", member.national_id),
-        infoRow("Phone", [el("i", { class: "fa-solid fa-phone", style: "margin-right:5px;color:var(--brass-500);" }), member.phone_number]),
-        infoRow("Status", titleCase(member.status)),
+        infoRow("Phone", [el("span", { class: "material-symbols-rounded", style: "color:var(--brass-500);margin-right:6px;font-size:16px;" }, "call"), member.phone_number]),
+        infoRow("Status", badge(titleCase(member.status))),
         infoRow("Date joined", formatDate(member.date_joined)),
         infoRow("Occupation", member.occupation || "—"),
         infoRow("Address", member.physical_address || "—"),
@@ -41,11 +41,11 @@ export async function renderProfile(root) {
           ...member.trusted_contacts.map((c) =>
             el("div", { style: "padding:8px 0;border-bottom:1px solid var(--line)" }, [
               el("div", { style: "display:flex;align-items:center;gap:8px;" }, [
-                el("i", { class: "fa-solid fa-user-check", style: "color:var(--pine-700);" }),
+                el("span", { class: "material-symbols-rounded", style: "color:var(--pine-700);font-size:20px;" }, "person_check"),
                 el("span", { style: "font-weight:600" }, c.full_name),
               ]),
-              el("div", { class: "muted small", style: "padding-left:24px;margin-top:2px;" }, [
-                el("i", { class: "fa-solid fa-phone", style: "margin-right:4px;" }),
+              el("div", { class: "muted small", style: "padding-left:28px;margin-top:2px;" }, [
+                el("span", { class: "material-symbols-rounded", style: "margin-right:4px;font-size:14px;vertical-align:-3px;" }, "call"),
                 c.phone_number
               ]),
             ])
@@ -67,7 +67,7 @@ function infoRow(label, value) {
   const valueEl = typeof value === "string" || typeof value === "number"
     ? el("span", { style: "font-weight:600" }, String(value))
     : el("span", { style: "font-weight:600;display:flex;align-items:center;" }, Array.isArray(value) ? value : [value]);
-  return el("div", { style: "display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)" }, [
+  return el("div", { class: "profile-info-row", style: "display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)" }, [
     el("span", { class: "muted small" }, label),
     valueEl,
   ]);
@@ -130,7 +130,7 @@ function buildBeneficiarySplitter(nextOfKin) {
   card.appendChild(totalEl);
   card.appendChild(el("div", { style: "margin-top:12px;" }, [
     el("button", { class: "btn btn-primary btn-sm", onclick: () => { updateTotal(); showToast("Beneficiary splits saved! 📋", "success"); } }, [
-      el("i", { class: "fa-solid fa-floppy-disk" }), " Save Splits"
+      el("span", { class: "material-symbols-rounded", style: "font-size:14px;vertical-align:-2px;margin-right:4px;" }, "save"), " Save Splits"
     ])
   ]));
 
@@ -149,7 +149,7 @@ function buildRatingWidget() {
     if (!currentRating) { showToast("Please select a star rating first.", "warn"); return; }
     localStorage.setItem(PREF_KEY, currentRating);
     showToast(`Thank you! You rated us ${currentRating} star${currentRating > 1 ? "s" : ""} ⭐`, "success");
-  }}, [el("i", { class: "fa-solid fa-paper-plane" }), " Submit Rating"]);
+  }}, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "send"), " Submit Rating"]);
 
   function render() {
     starsEl.innerHTML = "";
@@ -182,15 +182,15 @@ function buildRatingWidget() {
 function buildPasswordCard() {
   const errorEl = el("p", { class: "form-error", hidden: true });
   const submitBtn = el("button", { type: "submit", class: "btn btn-primary" }, [
-    el("i", { class: "fa-solid fa-lock" }), " Update Password"
+    el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "lock"), " Update Password"
   ]);
   const form = el("form", { style: "max-width:360px" }, [
     el("div", { class: "field" }, [
-      el("label", {}, [el("i", { class: "fa-solid fa-unlock", style: "margin-right:5px;color:var(--brass-500);" }), "Current password"]),
+      el("label", {}, [el("span", { class: "material-symbols-rounded", style: "color:var(--brass-500);margin-right:6px;font-size:16px;vertical-align:-3px;" }, "key"), "Current password"]),
       el("input", { type: "password", id: "current-password", required: true })
     ]),
     el("div", { class: "field" }, [
-      el("label", {}, [el("i", { class: "fa-solid fa-lock", style: "margin-right:5px;color:var(--brass-500);" }), "New password"]),
+      el("label", {}, [el("span", { class: "material-symbols-rounded", style: "color:var(--brass-500);margin-right:6px;font-size:16px;vertical-align:-3px;" }, "lock_reset"), "New password"]),
       el("input", { type: "password", id: "new-password", required: true, minlength: 8 })
     ]),
     errorEl,

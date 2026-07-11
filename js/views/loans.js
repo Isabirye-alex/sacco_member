@@ -49,8 +49,8 @@ export async function renderLoans(root) {
   });
 
   mount(root, [
-    el("div", { style: "display:flex;justify-content:flex-end;margin-bottom:16px" }, [
-      el("button", { class: "btn btn-primary", onclick: () => openApplyModal(memberId, products) }, "+ Apply for a loan"),
+    el("div", { style: "display:flex;justify-content:flex-end;margin-bottom:16px;flex-wrap:wrap;gap:8px;" }, [
+      el("button", { class: "btn btn-primary", onclick: () => openApplyModal(memberId, products) }, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "add"), " Apply for a loan"]),
     ]),
     tabs,
     content,

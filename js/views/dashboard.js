@@ -53,7 +53,7 @@ export async function renderDashboard(root) {
   const welcomeCard = el("div", { class: "card", style: "display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;" }, [
     el("div", {}, [
       el("h3", {}, [
-        el("i", { class: "fa-solid fa-hand-wave", style: "color:var(--brass-500);margin-right:8px;" }),
+        el("span", { class: "material-symbols-rounded filled", style: "color:var(--brass-500);margin-right:8px;font-size:22px;" }, "waving_hand"),
         `Welcome back, ${member ? member.first_name : user.full_name.split(" ")[0]}`
       ]),
       el("p", { class: "muted", style: "margin:0" }, member
@@ -61,14 +61,14 @@ export async function renderDashboard(root) {
         : "Loading your member profile…"),
     ]),
     el("button", { class: "btn btn-secondary btn-sm", onclick: () => showBadgesModal(accounts, loans, totalShares) }, [
-      el("i", { class: "fa-solid fa-trophy" }),
+      el("span", { class: "material-symbols-rounded filled", style: "font-size:15px;vertical-align:-2px;margin-right:4px;color:var(--brass-500);" }, "emoji_events"),
       " My Badges"
     ])
   ]);
 
   const quickActions = buildQuickActions();
 
-  const statCards = el("div", { class: "grid grid-3", style: "margin-top:16px" }, [
+  const statCards = el("div", { class: "grid grid-3 stats-grid", style: "margin-top:16px" }, [
     statCard("Total Savings", formatMoney(totalSavings), `${accounts.length} account${accounts.length === 1 ? "" : "s"}`, "fa-vault"),
     statCard("Active Loans", `${activeLoans.length}`, activeLoans.length ? `${formatMoney(totalOutstanding)} approved` : "No active loans", "fa-hand-holding-dollar"),
     statCard("Shares Held", `${totalShares}`, `${holdings.length} product${holdings.length === 1 ? "" : "s"}`, "fa-chart-pie"),
@@ -109,12 +109,12 @@ function statCard(label, value, sub, iconClass) {
 function buildQuickActions() {
   return el("div", { class: "card", style: "margin-top:16px" }, [
     el("div", { class: "card-header" }, [el("h3", {}, [el("i", { class: "fa-solid fa-bolt" }), " Quick Actions"])]),
-    el("div", { style: "display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:12px;" }, [
-      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/savings") }, [el("i", { class: "fa-solid fa-vault" }), " Savings Portal"]),
-      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/loans") }, [el("i", { class: "fa-solid fa-hand-holding-dollar" }), " Apply for Loan"]),
-      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/groups") }, [el("i", { class: "fa-solid fa-people-group" }), " Table Banking"]),
-      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/tools") }, [el("i", { class: "fa-solid fa-screwdriver-wrench" }), " Member Tools"]),
-      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/profile") }, [el("i", { class: "fa-solid fa-key" }), " Update Password"]),
+    el("div", { style: "display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px;" }, [
+      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/savings") }, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "account_balance"), " Savings Portal"]),
+      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/loans") }, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "payments"), " Apply for Loan"]),
+      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/groups") }, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "groups"), " Table Banking"]),
+      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/tools") }, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "construction"), " Member Tools"]),
+      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/profile") }, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "key"), " Update Password"]),
     ])
   ]);
 }
@@ -184,7 +184,7 @@ function buildAccountsPreview(accounts) {
   const card = el("div", { class: "card" }, [
     el("div", { class: "card-header" }, [
       el("h3", {}, "Savings accounts"),
-      el("button", { class: "btn btn-secondary btn-sm", onclick: () => goTo("/savings") }, "View all"),
+      el("button", { class: "btn btn-secondary btn-sm", onclick: () => goTo("/savings") }, [el("span", { class: "material-symbols-rounded", style: "font-size:14px;vertical-align:-2px;margin-right:4px;" }, "arrow_forward"), "View all"]),
     ]),
   ]);
 
@@ -213,7 +213,7 @@ function buildLoansPreview(loans) {
   const card = el("div", { class: "card" }, [
     el("div", { class: "card-header" }, [
       el("h3", {}, "Loan applications"),
-      el("button", { class: "btn btn-secondary btn-sm", onclick: () => goTo("/loans") }, "View all"),
+      el("button", { class: "btn btn-secondary btn-sm", onclick: () => goTo("/loans") }, [el("span", { class: "material-symbols-rounded", style: "font-size:14px;vertical-align:-2px;margin-right:4px;" }, "arrow_forward"), "View all"]),
     ]),
   ]);
 
