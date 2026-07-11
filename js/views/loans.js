@@ -1,16 +1,32 @@
 import { api } from "../api.js";
 import { requireMemberProfile } from "../auth.js";
-import { el, mount, formatMoney, formatDate, badge, openModal, showToast } from "../utils.js";
+import { el, mount, formatMoney, formatDate, badge, openModal, showToast, renderSkeleton } from "../utils.js";
 import { refreshCurrentRoute } from "../router.js";
 
 export async function renderLoans(root) {
   const memberId = requireMemberProfile();
 
-  const [loans, products, guaranteeRequests] = await Promise.all([
-    api.get(`/api/v1/loans/applications?member_id=${memberId}`),
-    api.get(`/api/v1/loans/products`),
-    api.get(`/api/v1/loans/guarantors/by-member/${memberId}`),
-  ]);
+  // Render shimmer loader immediately
+  renderSkeleton(root, "table");
+
+  let loans = [], products = [], guaranteeRequests = [];
+  try {
+    [loans, products, guaranteeRequests] = await Promise.all([
+      api.get(`/api/v1/loans/applications?member_id=${memberId}`),
+      api.get(`/api/v1/loans/products`),
+      api.get(`/api/v1/loans/guarantors/by-member/${memberId}`),
+    ]);
+  } catch (err) {
+    mount(
+      root,
+      el("div", { class: "card" }, [
+        el("h3", {}, "Could not load loan details"),
+        el("p", { class: "muted" }, err.message || "Please check your connection and try again."),
+        el("button", { class: "btn btn-primary", onclick: () => renderLoans(root) }, "Retry")
+      ])
+    );
+    return;
+  }
 
   const tabs = el("div", { class: "tabs" });
   const content = el("div", {});
@@ -192,28 +208,130 @@ function openApplyModal(memberId, products) {
         class: "btn btn-secondary btn-sm",
         onclick: () => addGuarantorRow(),
       }, "+ Add guarantor"),
-      el("div", { class: "field-hint" }, "Enter the guarantor's member number and the amount they're guaranteeing."),
+      el("div", { class: "field-hint" }, "Search for an active member. They must accept your guarantee request."),
     ]);
 
+    let debounceTimeout;
     function addGuarantorRow() {
-      const row = el("div", { class: "field-row", style: "margin-bottom:8px" }, [
-        el("input", { placeholder: "Guarantor member number", class: "guarantor-number" }),
-        el("input", { placeholder: "Amount guaranteed", type: "number", class: "guarantor-amount" }),
-        el("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: () => row.remove() }, "\u2715"),
+      const input = el("input", { placeholder: "Search guarantor by name/number...", class: "guarantor-number-input", autocomplete: "off", style: "width:100%" });
+      const dropdown = el("div", { class: "autocomplete-dropdown", style: "display:none;" });
+      const wrapper = el("div", { class: "autocomplete-wrapper", style: "flex:1" }, [input, dropdown]);
+      const amountInput = el("input", { placeholder: "Amount (UGX)", type: "number", class: "guarantor-amount", style: "width:140px" });
+
+      const row = el("div", { class: "field-row", style: "margin-bottom:8px; display:flex; gap:8px; align-items:center;" }, [
+        wrapper,
+        amountInput,
+        el("button", { type: "button", class: "btn btn-ghost btn-sm", onclick: () => row.remove() }, "✕"),
       ]);
+
+      input.addEventListener("input", () => {
+        clearTimeout(debounceTimeout);
+        const query = input.value.trim();
+        if (query.length < 2) {
+          dropdown.style.display = "none";
+          return;
+        }
+
+        debounceTimeout = setTimeout(async () => {
+          try {
+            const results = await api.get(`/api/v1/members?q=${encodeURIComponent(query)}`);
+            dropdown.innerHTML = "";
+            const matches = results.items || [];
+            const filtered = matches.filter(m => m.id !== memberId && m.status === "active");
+
+            if (!filtered.length) {
+              dropdown.appendChild(el("div", { class: "autocomplete-no-match" }, "No active members found"));
+              dropdown.style.display = "block";
+              return;
+            }
+
+            filtered.forEach((m) => {
+              const item = el("div", { class: "autocomplete-item" }, [
+                el("span", { style: "font-weight:600" }, `${m.first_name} ${m.last_name}`),
+                el("span", { class: "muted small" }, m.member_number),
+              ]);
+              item.addEventListener("click", () => {
+                input.value = `${m.first_name} ${m.last_name} (${m.member_number})`;
+                row.dataset.guarantorMemberId = m.id;
+                row.dataset.guarantorMemberNumber = m.member_number;
+                dropdown.style.display = "none";
+              });
+              dropdown.appendChild(item);
+            });
+            dropdown.style.display = "block";
+          } catch {
+            dropdown.style.display = "none";
+          }
+        }, 300);
+      });
+
+      document.addEventListener("click", (e) => {
+        if (e.target !== input && e.target !== dropdown) {
+          dropdown.style.display = "none";
+        }
+      });
+
       guarantorList.appendChild(row);
     }
 
+    const calcContainer = el("div", { class: "calculator-preview", style: "display:none;" });
+
     const errorEl = el("p", { class: "form-error", hidden: true });
+
+    const amountField = el("input", { type: "number", id: "loan-amount", required: true });
+    const monthsField = el("input", { type: "number", id: "loan-months", required: true });
+
+    function updateCalculator() {
+      calcContainer.innerHTML = "";
+      const product = selectedProduct();
+      const amount = Number(amountField.value) || 0;
+      const months = Number(monthsField.value) || 0;
+
+      if (!product || amount <= 0 || months <= 0) {
+        calcContainer.style.display = "none";
+        return;
+      }
+
+      calcContainer.style.display = "block";
+      const monthlyRate = Number(product.interest_rate || 1.2) / 100;
+      const totalInterest = amount * monthlyRate * months;
+      const totalRepayment = amount + totalInterest;
+      const monthlyPayment = totalRepayment / months;
+
+      calcContainer.appendChild(el("div", { class: "calc-title" }, "Repayment Calculation"));
+      calcContainer.appendChild(el("div", { class: "calc-grid" }, [
+        el("div", { class: "calc-stat" }, [
+          el("div", { class: "muted small" }, "Monthly Installment"),
+          el("div", { class: "calc-val" }, `UGX ${formatMoney(monthlyPayment)}`)
+        ]),
+        el("div", { class: "calc-stat" }, [
+          el("div", { class: "muted small" }, "Total Interest"),
+          el("div", { class: "calc-val" }, `UGX ${formatMoney(totalInterest)}`)
+        ]),
+        el("div", { class: "calc-stat" }, [
+          el("div", { class: "muted small" }, "Total Repayment"),
+          el("div", { class: "calc-val" }, `UGX ${formatMoney(totalRepayment)}`)
+        ]),
+        el("div", { class: "calc-stat" }, [
+          el("div", { class: "muted small" }, "Rate (monthly)"),
+          el("div", { class: "calc-val" }, `${(monthlyRate * 100).toFixed(1)}% p.m.`)
+        ]),
+      ]));
+    }
+
+    amountField.addEventListener("input", updateCalculator);
+    monthsField.addEventListener("input", updateCalculator);
+    productSelect.addEventListener("change", updateCalculator);
 
     const form = el("form", { id: "apply-loan-form" }, [
       el("div", { class: "field" }, [el("label", {}, "Loan product"), productSelect]),
       el("div", { class: "field-row" }, [
-        el("div", { class: "field" }, [el("label", {}, "Amount requested (UGX)"), el("input", { type: "number", id: "loan-amount", required: true })]),
-        el("div", { class: "field" }, [el("label", {}, "Repayment term (months)"), el("input", { type: "number", id: "loan-months", required: true })]),
+        el("div", { class: "field" }, [el("label", {}, "Amount requested (UGX)"), amountField]),
+        el("div", { class: "field" }, [el("label", {}, "Repayment term (months)"), monthsField]),
       ]),
       el("div", { class: "field" }, [el("label", {}, "Purpose"), el("textarea", { id: "loan-purpose", rows: 3 })]),
       guarantorSection,
+      calcContainer,
       errorEl,
       el("div", { class: "modal-actions" }, [
         el("button", { type: "button", class: "btn btn-secondary", onclick: closeFn }, "Cancel"),
@@ -226,8 +344,8 @@ function openApplyModal(memberId, products) {
       errorEl.hidden = true;
 
       const product = selectedProduct();
-      const amount = Number(form.querySelector("#loan-amount").value);
-      const months = Number(form.querySelector("#loan-months").value);
+      const amount = Number(amountField.value);
+      const months = Number(monthsField.value);
       const purpose = form.querySelector("#loan-purpose").value;
 
       const guarantorRowEls = [...guarantorList.children];
@@ -235,13 +353,13 @@ function openApplyModal(memberId, products) {
 
       try {
         for (const row of guarantorRowEls) {
-          const memberNumber = row.querySelector(".guarantor-number").value.trim();
+          const gId = row.dataset.guarantorMemberId;
+          const gNumber = row.dataset.guarantorMemberNumber;
           const amountGuaranteed = Number(row.querySelector(".guarantor-amount").value);
-          if (!memberNumber) continue;
-          const results = await api.get(`/api/v1/members?q=${encodeURIComponent(memberNumber)}`);
-          const found = results.items.find((m) => m.member_number === memberNumber) || results.items[0];
-          if (!found) throw new Error(`Could not find a member with number "${memberNumber}".`);
-          guarantors.push({ guarantor_member_id: found.id, amount_guaranteed: amountGuaranteed || 0 });
+          if (!gId) {
+            throw new Error("Please search and select a valid active member for all guarantor fields.");
+          }
+          guarantors.push({ guarantor_member_id: gId, amount_guaranteed: amountGuaranteed || 0 });
         }
 
         if (product.requires_guarantors && guarantors.length < product.min_guarantors) {

@@ -23,6 +23,9 @@
         <label>Password
           <input type="password" id="login-password" required autocomplete="current-password" />
         </label>
+        <div style="display:flex; justify-content:flex-end; margin-top:-6px; margin-bottom:12px;">
+          <a href="#" id="forgot-password-link" class="forgot-password-link">Forgot password?</a>
+        </div>
         <button type="submit" class="btn btn-primary btn-block">Sign in</button>
         <p id="login-error" class="form-error" hidden></p>
       </form>
@@ -47,7 +50,11 @@
       </nav>
       <div class="sidebar-footer">
         <div id="user-chip" class="user-chip"></div>
-        <button id="logout-btn" class="btn btn-ghost btn-block">Log out</button>
+        <button id="theme-toggle-btn" class="theme-switch-btn">
+          <span class="theme-icon">☀️</span>
+          <span class="theme-label">Light Mode</span>
+        </button>
+        <button id="logout-btn" class="btn btn-ghost btn-block" style="margin-top:6px;">Log out</button>
       </div>
     </aside>
 
@@ -55,6 +62,10 @@
       <header class="topbar">
         <button id="menu-toggle" class="icon-btn" aria-label="Toggle menu">&#9776;</button>
         <h2 id="page-title">Dashboard</h2>
+        <div id="connection-indicator" class="conn-badge online">
+          <span class="dot"></span>
+          <span class="text">Connected</span>
+        </div>
       </header>
       <main id="view-root" class="view-root">
         <!-- view content injected here -->

@@ -87,3 +87,101 @@ export function openModal(title, buildBody) {
   document.body.appendChild(backdrop);
   return close;
 }
+
+/** Render custom skeleton loaders / shimmer screens */
+export function renderSkeleton(rootNode, templateType = "card") {
+  clearNode(rootNode);
+  if (templateType === "dashboard") {
+    const items = el("div", { style: "width:100%" }, [
+      el("div", { class: "shimmer-card", style: "margin-bottom:16px" }, [
+        el("div", { class: "shimmer-elem shimmer-title" }),
+        el("div", { class: "shimmer-elem shimmer-line half" }),
+      ]),
+      el("div", { class: "grid grid-3" }, [
+        el("div", { class: "shimmer-card" }, [
+          el("div", { class: "shimmer-elem shimmer-title" }),
+          el("div", { class: "shimmer-elem shimmer-line" }),
+        ]),
+        el("div", { class: "shimmer-card" }, [
+          el("div", { class: "shimmer-elem shimmer-title" }),
+          el("div", { class: "shimmer-elem shimmer-line" }),
+        ]),
+        el("div", { class: "shimmer-card" }, [
+          el("div", { class: "shimmer-elem shimmer-title" }),
+          el("div", { class: "shimmer-elem shimmer-line" }),
+        ]),
+      ]),
+      el("div", { class: "grid grid-2", style: "margin-top:16px" }, [
+        el("div", { class: "shimmer-card" }, [
+          el("div", { class: "shimmer-elem shimmer-title" }),
+          el("div", { class: "shimmer-elem shimmer-line" }),
+          el("div", { class: "shimmer-elem shimmer-line" }),
+        ]),
+        el("div", { class: "shimmer-card" }, [
+          el("div", { class: "shimmer-elem shimmer-title" }),
+          el("div", { class: "shimmer-elem shimmer-line" }),
+          el("div", { class: "shimmer-elem shimmer-line" }),
+        ]),
+      ])
+    ]);
+    rootNode.appendChild(items);
+  } else if (templateType === "table") {
+    const tableShimmer = el("div", { class: "shimmer-card" }, [
+      el("div", { class: "shimmer-elem shimmer-title", style: "width: 15%" }),
+      el("div", { style: "display:flex; flex-direction:column; gap:10px; margin-top:20px" }, [
+        el("div", { style: "display:flex; gap:10px" }, [
+          el("div", { class: "shimmer-elem shimmer-line", style: "flex:1" }),
+          el("div", { class: "shimmer-elem shimmer-line", style: "flex:1" }),
+          el("div", { class: "shimmer-elem shimmer-line", style: "flex:1" }),
+        ]),
+        el("div", { style: "display:flex; gap:10px" }, [
+          el("div", { class: "shimmer-elem shimmer-line", style: "flex:1" }),
+          el("div", { class: "shimmer-elem shimmer-line", style: "flex:1" }),
+          el("div", { class: "shimmer-elem shimmer-line", style: "flex:1" }),
+        ]),
+        el("div", { style: "display:flex; gap:10px" }, [
+          el("div", { class: "shimmer-elem shimmer-line", style: "flex:1" }),
+          el("div", { class: "shimmer-elem shimmer-line", style: "flex:1" }),
+          el("div", { class: "shimmer-elem shimmer-line", style: "flex:1" }),
+        ]),
+      ])
+    ]);
+    rootNode.appendChild(tableShimmer);
+  } else {
+    const cardShimmer = el("div", { class: "shimmer-card" }, [
+      el("div", { class: "shimmer-elem shimmer-title" }),
+      el("div", { class: "shimmer-elem shimmer-line" }),
+      el("div", { class: "shimmer-elem shimmer-line half" }),
+    ]);
+    rootNode.appendChild(cardShimmer);
+  }
+}
+
+/** CSV Exporter utility */
+export function exportToCSV(filename, headers, rows) {
+  const escapeCSV = (val) => {
+    if (val === null || val === undefined) return '';
+    const str = String(val);
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  };
+
+  const csvRows = [];
+  csvRows.push(headers.map(escapeCSV).join(','));
+  for (const row of rows) {
+    csvRows.push(row.map(escapeCSV).join(','));
+  }
+
+  const csvContent = csvRows.join("\n");
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+

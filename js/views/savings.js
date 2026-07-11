@@ -1,11 +1,28 @@
 import { api } from "../api.js";
 import { requireMemberProfile } from "../auth.js";
-import { el, mount, formatMoney, formatDateTime, titleCase, openModal, showToast } from "../utils.js";
+import { el, mount, formatMoney, formatDateTime, titleCase, openModal, showToast, renderSkeleton, exportToCSV } from "../utils.js";
 import { refreshCurrentRoute } from "../router.js";
 
 export async function renderSavings(root) {
   const memberId = requireMemberProfile();
-  const accounts = await api.get(`/api/v1/savings/members/${memberId}/accounts`);
+
+  // Render Skeleton view immediately
+  renderSkeleton(root, "card");
+
+  let accounts = [];
+  try {
+    accounts = await api.get(`/api/v1/savings/members/${memberId}/accounts`);
+  } catch (err) {
+    mount(
+      root,
+      el("div", { class: "card" }, [
+        el("h3", {}, "Could not load savings accounts"),
+        el("p", { class: "muted" }, err.message || "Please check your connection."),
+        el("button", { class: "btn btn-primary", onclick: () => renderSavings(root) }, "Retry")
+      ])
+    );
+    return;
+  }
 
   if (!accounts.length) {
     mount(
@@ -23,7 +40,7 @@ export async function renderSavings(root) {
 }
 
 function buildAccountCard(account, memberId) {
-  const card = el("div", { class: "card" }, [
+  const card = el("div", { class: "card interactive" }, [
     el("div", { class: "card-header" }, [
       el("div", {}, [
         el("h3", {}, account.account_number),
@@ -156,10 +173,92 @@ async function pollTransactionStatus(transactionId, closeFn, statusEl, submitBtn
 }
 
 function showTransactionsModal(account, txns) {
-  openModal(`${account.account_number} — Transactions`, () => {
+  openModal(`${account.account_number} — Transactions`, (closeFn) => {
     if (!txns.length) {
       return [el("p", { class: "muted" }, "No transactions recorded yet.")];
     }
+
+    let filteredTxns = [...txns];
+
+    const searchInput = el("input", {
+      type: "text",
+      placeholder: "Search by amount/type...",
+      style: "flex:1; padding:6px 10px; font-size:13px; border:1px solid var(--line); border-radius:6px;"
+    });
+
+    const typeSelect = el("select", {
+      style: "padding:6px 10px; font-size:13px; border:1px solid var(--line); border-radius:6px;"
+    }, [
+      el("option", { value: "all" }, "All Types"),
+      el("option", { value: "deposit" }, "Deposits"),
+      el("option", { value: "withdrawal" }, "Withdrawals"),
+      el("option", { value: "interest" }, "Interest"),
+      el("option", { value: "transfer" }, "Transfers"),
+    ]);
+
+    const exportBtn = el("button", {
+      class: "btn btn-secondary btn-sm",
+      onclick: () => {
+        const headers = ["Date", "Type", "Amount", "Balance After"];
+        const rows = filteredTxns.map((t) => [
+          formatDateTime(t.created_at),
+          titleCase(t.txn_type),
+          t.amount,
+          t.balance_after
+        ]);
+        exportToCSV(`transactions_${account.account_number}.csv`, headers, rows);
+        showToast("CSV exported successfully", "success");
+      }
+    }, "📥 Export CSV");
+
+    const filterRow = el("div", {
+      style: "display:flex; gap:8px; margin-bottom:12px; align-items:center; flex-wrap:wrap; width:100%"
+    }, [searchInput, typeSelect, exportBtn]);
+
+    const tbody = el("tbody", {});
+
+    function renderTableRows() {
+      tbody.innerHTML = "";
+      if (filteredTxns.length === 0) {
+        tbody.appendChild(
+          el("tr", {}, el("td", { colspan: 4, class: "table-empty" }, "No matching transactions found."))
+        );
+        return;
+      }
+      filteredTxns.forEach((t) => {
+        tbody.appendChild(
+          el("tr", {}, [
+            el("td", {}, formatDateTime(t.created_at)),
+            el("td", {}, titleCase(t.txn_type)),
+            el("td", { class: "ledger" }, formatMoney(t.amount)),
+            el("td", { class: "ledger" }, formatMoney(t.balance_after)),
+          ])
+        );
+      });
+    }
+
+    function applyFilters() {
+      const q = searchInput.value.toLowerCase();
+      const type = typeSelect.value;
+
+      filteredTxns = txns.filter((t) => {
+        const matchesQuery = q === "" ||
+          String(t.amount).includes(q) ||
+          titleCase(t.txn_type).toLowerCase().includes(q) ||
+          formatDateTime(t.created_at).toLowerCase().includes(q);
+
+        const matchesType = type === "all" || String(t.txn_type).toLowerCase() === type;
+
+        return matchesQuery && matchesType;
+      });
+      renderTableRows();
+    }
+
+    searchInput.addEventListener("input", applyFilters);
+    typeSelect.addEventListener("change", applyFilters);
+
+    renderTableRows();
+
     const table = el("div", { class: "table-wrap" }, [
       el("table", {}, [
         el("thead", {}, el("tr", {}, [
@@ -168,20 +267,10 @@ function showTransactionsModal(account, txns) {
           el("th", {}, "Amount"),
           el("th", {}, "Balance after"),
         ])),
-        el(
-          "tbody",
-          {},
-          txns.map((t) =>
-            el("tr", {}, [
-              el("td", {}, formatDateTime(t.created_at)),
-              el("td", {}, titleCase(t.txn_type)),
-              el("td", { class: "ledger" }, formatMoney(t.amount)),
-              el("td", { class: "ledger" }, formatMoney(t.balance_after)),
-            ])
-          )
-        ),
+        tbody
       ]),
     ]);
-    return [table];
+
+    return [filterRow, table];
   });
 }

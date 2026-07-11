@@ -38,9 +38,39 @@
   --radius: 10px;
   --shadow-sm: 0 1px 2px rgba(18, 49, 43, 0.06);
   --shadow-md: 0 6px 20px rgba(18, 49, 43, 0.10);
+  
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-* { box-sizing: border-box; }
+:root[data-theme="dark"] {
+  --pine-900: #E7EFEC;
+  --pine-800: #77B6AB;
+  --pine-700: #559E92;
+  --pine-100: #193E37;
+
+  --brass-500: #DFB86C;
+  --brass-600: #F5EAD1;
+  --brass-100: #2D230D;
+
+  --paper: #0E2621;
+  --surface: #14352F;
+  --ink-900: #F5F7F6;
+  --ink-600: #A8B8B2;
+  --ink-400: #7E938D;
+  --line: #235249;
+
+  --danger: #E25C56;
+  --danger-bg: #401815;
+  --success: #77B6AB;
+  --success-bg: #193E37;
+  --warn: #DFB86C;
+  --warn-bg: #352B14;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+* { box-sizing: border-box; transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
 
 html, body {
   margin: 0;
@@ -397,3 +427,264 @@ tbody tr:hover { background: var(--pine-100); }
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
 }
+
+/* ---------- Theme Switcher ---------- */
+.theme-switch-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  width: 100%;
+  margin-top: 10px;
+  transition: var(--transition);
+}
+.theme-switch-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--brass-500);
+}
+[data-theme="dark"] .theme-switch-btn {
+  background: rgba(18, 49, 43, 0.4);
+  border-color: var(--line);
+  color: var(--pine-900);
+}
+[data-theme="dark"] .theme-switch-btn:hover {
+  background: var(--pine-100);
+}
+
+/* ---------- Connectivity Indicator ---------- */
+.conn-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: var(--transition);
+  margin-left: auto;
+  border: 1px solid transparent;
+}
+.conn-badge.online {
+  background: var(--success-bg);
+  color: var(--success);
+  border-color: rgba(27, 75, 67, 0.15);
+}
+.conn-badge.offline {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border-color: rgba(179, 38, 30, 0.15);
+  animation: pulse-border 1.5s infinite alternate;
+}
+.conn-badge .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.conn-badge.online .dot {
+  animation: pulse-dot 2s infinite;
+}
+@keyframes pulse-dot {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.6; }
+}
+@keyframes pulse-border {
+  from { box-shadow: 0 0 0 0 rgba(179, 38, 30, 0.4); }
+  to { box-shadow: 0 0 0 6px rgba(179, 38, 30, 0); }
+}
+
+/* ---------- Skeleton Loader (Shimmers) ---------- */
+.shimmer-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+.shimmer-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.shimmer-elem {
+  background: linear-gradient(90deg, var(--paper) 25%, var(--line) 37%, var(--paper) 63%);
+  background-size: 400% 100%;
+  animation: shimmer-swipe 1.4s ease infinite;
+  border-radius: 4px;
+}
+.shimmer-title { height: 20px; width: 35%; margin-bottom: 12px; }
+.shimmer-line { height: 14px; width: 100%; margin-bottom: 8px; }
+.shimmer-line.half { width: 50%; }
+.shimmer-circle { width: 48px; height: 48px; border-radius: 50%; }
+@keyframes shimmer-swipe {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ---------- Interactive Autocomplete Selector ---------- */
+.autocomplete-wrapper {
+  position: relative;
+  width: 100%;
+}
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  max-height: 180px;
+  overflow-y: auto;
+  z-index: 99;
+  margin-top: 4px;
+}
+.autocomplete-item {
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 13.5px;
+  border-bottom: 1px solid var(--paper);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.15s ease;
+}
+.autocomplete-item:last-child { border-bottom: none; }
+.autocomplete-item:hover, .autocomplete-item.active {
+  background: var(--pine-100);
+  color: var(--pine-900);
+}
+.autocomplete-no-match {
+  padding: 12px;
+  font-size: 13px;
+  color: var(--ink-400);
+  text-align: center;
+}
+
+/* ---------- Loan Calculator styling ---------- */
+.calculator-preview {
+  background: var(--pine-100);
+  border-radius: 8px;
+  padding: 14px;
+  margin-top: 14px;
+  border-left: 4px solid var(--brass-500);
+}
+.calculator-preview .calc-title {
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--pine-900);
+  margin-bottom: 8px;
+}
+.calculator-preview .calc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.calculator-preview .calc-stat {
+  font-size: 12.5px;
+}
+.calculator-preview .calc-stat .calc-val {
+  font-family: var(--font-ledger);
+  font-weight: 600;
+  font-size: 14.5px;
+  color: var(--pine-900);
+}
+
+/* ---------- Activity Timeline ---------- */
+.timeline {
+  position: relative;
+  padding-left: 20px;
+  border-left: 2px solid var(--line);
+  margin-left: 8px;
+}
+.timeline-item {
+  position: relative;
+  margin-bottom: 18px;
+}
+.timeline-item:last-child { margin-bottom: 0; }
+.timeline-icon {
+  position: absolute;
+  left: -29px;
+  top: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 3px solid var(--brass-500);
+  z-index: 2;
+}
+.timeline-content {
+  font-size: 13.5px;
+}
+.timeline-date {
+  font-size: 11px;
+  color: var(--ink-400);
+  margin-top: 2px;
+}
+
+/* ---------- Premium interactive cards ---------- */
+.card.interactive {
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card.interactive:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: var(--shadow-md);
+  border-color: var(--brass-500);
+}
+.card.interactive:active {
+  transform: translateY(-1px) scale(1.002);
+}
+
+/* ---------- SVG Financial Portfolio Ring ---------- */
+.portfolio-svg-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 14px;
+}
+.portfolio-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+/* ---------- Forgot password actions ---------- */
+.forgot-password-link {
+  display: inline-block;
+  font-size: 12.5px;
+  color: var(--brass-600);
+  text-decoration: none;
+  margin-top: 8px;
+  font-weight: 500;
+  transition: var(--transition);
+}
+.forgot-password-link:hover {
+  color: var(--brass-500);
+  text-decoration: underline;
+}
+
