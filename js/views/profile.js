@@ -1,6 +1,6 @@
 import { api } from "../api.js";
 import { getCurrentUser, getCurrentMember } from "../auth.js";
-import { el, mount, formatDate, titleCase, showToast, openModal } from "../utils.js";
+import { el, mount, formatDate, titleCase, showToast, openModal, badge } from "../utils.js";
 
 export async function renderProfile(root) {
   const user = getCurrentUser();
