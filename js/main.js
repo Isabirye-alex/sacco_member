@@ -11,6 +11,7 @@ import { renderGroups } from "./views/groups.js";
 import { renderNotifications } from "./views/notifications.js";
 import { renderProfile } from "./views/profile.js";
 import { renderTools } from "./views/tools.js";
+import { renderReferrals } from "./views/referrals.js";
 
 registerRoute("/dashboard", "Dashboard", renderDashboard);
 registerRoute("/savings", "Savings", renderSavings);
@@ -19,6 +20,7 @@ registerRoute("/shares", "Shares", renderShares);
 registerRoute("/groups", "Groups", renderGroups);
 registerRoute("/notifications", "Notifications", renderNotifications);
 registerRoute("/tools", "Member Tools", renderTools);
+registerRoute("/referrals", "Invite & Earn", renderReferrals);
 registerRoute("/profile", "My Profile", renderProfile);
 
 function renderUserChip() {
