@@ -5,7 +5,7 @@ import { refreshCurrentRoute } from "../router.js";
 
 export async function renderReferrals(root) {
   const memberId = requireMemberProfile();
-  const referrals = await api.get(`/api/v1/referrals/members/${memberId}`);
+  const referrals = await loadReferrals(memberId);
 
   const paidCount = referrals.filter((r) => r.status === "commission_paid").length;
   const totalEarned = referrals
@@ -59,6 +59,29 @@ export async function renderReferrals(root) {
   ]);
 
   mount(root, [summary, inviteCard, listCard]);
+}
+
+async function loadReferrals(memberId) {
+  const candidates = [
+    `/api/v1/referrals/members/${memberId}`,
+    `/api/v1/referrals?referrer_member_id=${memberId}`,
+    `/api/v1/referrals?member_id=${memberId}`,
+  ];
+
+  for (const path of candidates) {
+    try {
+      const payload = await api.get(path);
+      if (Array.isArray(payload)) return payload;
+      if (Array.isArray(payload?.items)) return payload.items;
+      if (Array.isArray(payload?.data)) return payload.data;
+      if (Array.isArray(payload?.referrals)) return payload.referrals;
+      return [];
+    } catch (err) {
+      if (err.status !== 404) throw err;
+    }
+  }
+
+  return [];
 }
 
 function buildInviteForm(memberId) {
