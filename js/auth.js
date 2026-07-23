@@ -16,7 +16,26 @@ export function getCurrentMember() {
   return currentMember;
 }
 
-export async function login(email, password) {
+let inactivityTimer = null;
+const IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+
+export function resetInactivityTimer() {
+  if (inactivityTimer) clearTimeout(inactivityTimer);
+  if (isAuthenticated()) {
+    inactivityTimer = setTimeout(() => {
+      logout();
+      alert("Session expired due to 30 minutes of inactivity. Please sign in again.");
+    }, IDLE_TIMEOUT_MS);
+  }
+}
+
+if (typeof window !== "undefined") {
+  ["mousemove", "keydown", "click", "scroll", "touchstart"].forEach((evt) => {
+    window.addEventListener(evt, resetInactivityTimer, { passive: true });
+  });
+}
+
+export async function login(email, password, remember = false) {
   const form = new URLSearchParams();
   form.set("username", email);
   form.set("password", password);
@@ -33,12 +52,14 @@ export async function login(email, password) {
   }
 
   const data = await res.json();
-  tokenStore.set(data.access_token, data.refresh_token);
+  tokenStore.set(data.access_token, data.refresh_token, remember);
+  resetInactivityTimer();
   await loadCurrentUser();
   return currentUser;
 }
 
 export function logout() {
+  if (inactivityTimer) clearTimeout(inactivityTimer);
   tokenStore.clear();
   currentUser = null;
   currentMember = null;
@@ -56,6 +77,7 @@ export async function loadCurrentUser() {
   } else {
     currentMember = null;
   }
+  resetInactivityTimer();
   return currentUser;
 }
 
