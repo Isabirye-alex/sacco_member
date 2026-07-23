@@ -229,9 +229,9 @@ function initConnectivityMonitor() {
     try {
       const controller = new AbortController();
       const id = setTimeout(() => controller.abort(), 4000);
-      const res = await fetch(`${API_BASE_URL}/api/v1/auth/me`, { method: "GET", signal: controller.signal });
+      const res = await fetch(`${API_BASE_URL}/health`, { method: "GET", signal: controller.signal });
       clearTimeout(id);
-      setStatus(res.status === 200 || res.status === 401);
+      setStatus(res.status === 200);
     } catch { setStatus(false); }
   }
 
