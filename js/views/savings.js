@@ -46,7 +46,7 @@ function buildAccountCard(account, memberId) {
         el("h3", {}, account.account_number),
         el("div", { class: "muted small" }, account.is_active ? "Active" : "Closed"),
       ]),
-      el("div", { class: "ledger", style: "font-size:22px;font-weight:600;color:var(--pine-900)" }, `UGX ${formatMoney(account.balance)}`),
+      el("div", { class: "ledger", style: "font-size:22px;font-weight:600;color:var(--heading-color)" }, `UGX ${formatMoney(account.balance)}`),
     ]),
   ]);
 

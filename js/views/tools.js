@@ -489,7 +489,7 @@ function buildCurrencyConverter() {
     const converted = inUGX * RATES[to];
     resultEl.innerHTML = `
       <div style="font-size:11px;color:var(--ink-400);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Converted Amount</div>
-      <div style="font-family:var(--font-ledger);font-size:22px;font-weight:700;color:var(--pine-900);">${FLAGS[to]} ${to} ${converted.toLocaleString("en-UG", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</div>
+      <div style="font-family:var(--font-ledger);font-size:22px;font-weight:700;color:var(--heading-color);">${FLAGS[to]} ${to} ${converted.toLocaleString("en-UG", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</div>
       <div class="rate-grid" style="margin-top:10px;">
         <div class="rate-item"><div style="font-size:11px;color:var(--ink-400);">1 ${from}</div><div class="rate-value">${(RATES[to] / RATES[from]).toFixed(6)} ${to}</div></div>
         <div class="rate-item"><div style="font-size:11px;color:var(--ink-400);">1 ${to}</div><div class="rate-value">${(RATES[from] / RATES[to]).toFixed(4)} ${from}</div></div>

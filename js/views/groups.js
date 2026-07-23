@@ -53,7 +53,7 @@ async function buildGroupCard(membership, memberId) {
       el("div", { class: "muted small" }, `${titleCase(membership.role)} \u00b7 Joined ${formatDate(membership.joined_date)}`),
       el("div", { class: "muted small", style: "margin-top:6px; color:var(--brass-600)" }, "Click to view full details & contributions")
     ]),
-    el("div", { class: "ledger", style: "font-size:20px; font-weight:600; color:var(--pine-900)" }, `UGX ${formatMoney(total)}`),
+    el("div", { class: "ledger", style: "font-size:20px; font-weight:600; color:var(--heading-color)" }, `UGX ${formatMoney(total)}`),
   ]);
 
   return card;
