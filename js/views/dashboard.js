@@ -46,7 +46,7 @@ export async function renderDashboard(root) {
   const activeLoans = loans.filter((l) => ["active", "disbursed"].includes(l.status));
   const totalOutstanding = activeLoans.reduce((sum, l) => sum + Number(l.amount_approved || 0), 0);
   const totalShares = holdings.reduce((sum, h) => sum + Number(h.number_of_shares || 0), 0);
-  const totalSharesVal = totalShares * 10000; // Assuming mock share valuation of 10,000 UGX per share
+  const totalSharesVal = holdings.reduce((sum, h) => sum + Number(h.total_value || (h.number_of_shares * 10000) || 0), 0);
 
   const ticker = buildNewsTicker();
 

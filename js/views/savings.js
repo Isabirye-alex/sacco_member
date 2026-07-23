@@ -59,6 +59,10 @@ function buildAccountCard(account, memberId) {
       class: "btn btn-secondary btn-sm",
       onclick: () => openMobileMoneyModal("withdraw", account, memberId),
     }, [el("span", { class: "material-symbols-rounded", style: "font-size:14px;vertical-align:-2px;margin-right:4px;" }, "arrow_upward"), " Withdraw"]),
+    el("button", {
+      class: "btn btn-secondary btn-sm",
+      onclick: () => openInternalTransferModal(account, memberId),
+    }, [el("span", { class: "material-symbols-rounded", style: "font-size:14px;vertical-align:-2px;margin-right:4px;" }, "swap_horiz"), " Transfer"]),
     el(
       "button",
       {
@@ -281,5 +285,48 @@ function showTransactionsModal(account, txns) {
     ]);
 
     return [filterRow, table];
+  });
+}
+
+
+function openInternalTransferModal(account, memberId) {
+  openModal("Transfer Funds to Member", (closeFn) => {
+    const errorEl = el("p", { class: "form-error", hidden: true });
+    const recipAccountInput = el("input", { type: "text", required: true, placeholder: "Recipient Account Number (e.g. SAV-XXXX)" });
+    const amountInput = el("input", { type: "number", required: true, min: "1000", step: "100", placeholder: "Amount in UGX" });
+    const narrativeInput = el("input", { type: "text", placeholder: "Reason / Narrative (Optional)" });
+
+    const form = el("form", {}, [
+      el("p", { class: "muted small" }, `Transferring from account ${account.account_number} (Available: UGX ${formatMoney(account.balance)})`),
+      el("div", { class: "field" }, [el("label", {}, "Recipient Account Number"), recipAccountInput]),
+      el("div", { class: "field" }, [el("label", {}, "Transfer Amount (UGX)"), amountInput]),
+      el("div", { class: "field" }, [el("label", {}, "Narrative"), narrativeInput]),
+      errorEl,
+      el("div", { class: "modal-actions" }, [
+        el("button", { type: "button", class: "btn btn-secondary", onclick: closeFn }, "Cancel"),
+        el("button", { type: "submit", class: "btn btn-primary" }, "Send Transfer")
+      ])
+    ]);
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorEl.hidden = true;
+      try {
+        const res = await api.post("/api/v1/savings/transfer", {
+          sender_account_id: account.id,
+          recipient_account_number: recipAccountInput.value.trim(),
+          amount: Number(amountInput.value),
+          narrative: narrativeInput.value.trim() || "Member Transfer"
+        });
+        showToast(res.message || "Transfer completed successfully", "success");
+        closeFn();
+        refreshCurrentRoute();
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.hidden = false;
+      }
+    });
+
+    return [form];
   });
 }
