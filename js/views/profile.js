@@ -1,5 +1,5 @@
 import { api } from "../api.js";
-import { getCurrentUser, getCurrentMember } from "../auth.js";
+import { getCurrentUser, getCurrentMember, loadCurrentUser } from "../auth.js";
 import { el, mount, formatDate, titleCase, showToast, openModal, badge } from "../utils.js";
 
 export async function renderProfile(root) {
@@ -13,7 +13,7 @@ export async function renderProfile(root) {
     infoRow("Role", [el("span", { class: "material-symbols-rounded", style: "color:var(--brass-500);margin-right:6px;font-size:16px;vertical-align:-3px;" }, "badge"), titleCase(user.role)]),
   ]);
 
-  const sections = [accountCard];
+  const sections = [accountCard, build2FACard(user)];
 
   if (member) {
     sections.push(
@@ -223,4 +223,148 @@ function buildPasswordCard() {
     el("div", { class: "card-header" }, [el("h3", {}, [el("i", { class: "fa-solid fa-key" }), " Change Password"])]),
     form
   ]);
+}
+
+
+/* ── Two-Factor Authentication (2FA) UI ─────────────────── */
+function build2FACard(user) {
+  const isEnabled = Boolean(user.is_2fa_enabled);
+  const statusBadge = el(
+    "span",
+    { class: `badge ${isEnabled ? "badge-success" : "badge-warn"}` },
+    isEnabled ? "ENABLED" : "DISABLED"
+  );
+
+  const card = el("div", { class: "card" }, [
+    el("div", { class: "card-header" }, [
+      el("h3", {}, [
+        el("span", { class: "material-symbols-rounded filled", style: "color:var(--brass-500);margin-right:6px;font-size:18px;" }, "security"),
+        " Two-Factor Authentication (2FA)"
+      ]),
+      statusBadge
+    ]),
+    el("p", { class: "muted small", style: "margin-bottom:14px;" },
+      "Protect your SACCO account with 2FA using Google Authenticator, Authy, or 1Password."
+    ),
+    el("div", { style: "display:flex;gap:10px;align-items:center;" }, [
+      isEnabled
+        ? el("button", {
+            class: "btn btn-outline btn-sm",
+            style: "border-color:var(--danger);color:var(--danger);",
+            onclick: () => openDisable2FAModal()
+          }, [
+            el("span", { class: "material-symbols-rounded", style: "font-size:15px;margin-right:4px;" }, "lock_open"),
+            " Disable 2FA"
+          ])
+        : el("button", {
+            class: "btn btn-primary btn-sm",
+            onclick: () => openSetup2FAModal()
+          }, [
+            el("span", { class: "material-symbols-rounded", style: "font-size:15px;margin-right:4px;" }, "verified_user"),
+            " Setup Two-Factor Authentication"
+          ])
+    ])
+  ]);
+
+  return card;
+}
+
+async function openSetup2FAModal() {
+  try {
+    const setupData = await api.post("/api/v1/auth/2fa/setup", {});
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(setupData.provisioning_uri)}`;
+
+    openModal("Setup Two-Factor Authentication", (close) => {
+      const codeInput = el("input", {
+        type: "text",
+        placeholder: "123456",
+        maxlength: "6",
+        style: "letter-spacing:4px;font-weight:700;font-size:18px;text-align:center;width:160px;margin:8px auto;display:block;",
+        required: true,
+      });
+
+      const errEl = el("p", { class: "form-error", hidden: true, style: "margin-top:10px;" });
+
+      const form = el("form", {
+        onsubmit: async (e) => {
+          e.preventDefault();
+          errEl.hidden = true;
+          try {
+            await api.post("/api/v1/auth/2fa/enable", { code: codeInput.value.trim() });
+            showToast("2FA successfully enabled! 🔐", "success");
+            close();
+            loadCurrentUser().then(() => {
+              const root = document.getElementById("view-root");
+              if (root) renderProfile(root);
+            });
+          } catch (err) {
+            errEl.textContent = err.message || "Invalid verification code.";
+            errEl.hidden = false;
+          }
+        }
+      }, [
+        el("p", { class: "muted small" }, "1. Scan this QR code with Google Authenticator or Authy:"),
+        el("div", { style: "text-align:center;margin:12px 0;" }, [
+          el("img", { src: qrUrl, alt: "2FA QR Code", style: "border-radius:12px;border:2px solid var(--brass-500);padding:6px;background:#fff;" })
+        ]),
+        el("p", { class: "muted small", style: "text-align:center;" }, [
+          "Manual entry key: ",
+          el("code", { style: "background:var(--input-bg);padding:3px 8px;border-radius:6px;font-family:var(--font-mono);font-size:13px;" }, setupData.manual_entry_key)
+        ]),
+        el("p", { class: "muted small", style: "margin-top:14px;text-align:center;" }, "2. Enter the 6-digit verification code from your authenticator app:"),
+        codeInput,
+        errEl,
+        el("div", { style: "display:flex;justify-content:flex-end;gap:10px;margin-top:18px;" }, [
+          el("button", { type: "button", class: "btn btn-outline btn-sm", onclick: close }, "Cancel"),
+          el("button", { type: "submit", class: "btn btn-primary btn-sm" }, "Verify & Enable 2FA")
+        ])
+      ]);
+
+      return [form];
+    });
+  } catch (err) {
+    showToast(err.message || "Failed to setup 2FA.", "error");
+  }
+}
+
+function openDisable2FAModal() {
+  openModal("Disable Two-Factor Authentication", (close) => {
+    const codeInput = el("input", {
+      type: "text",
+      placeholder: "123456",
+      maxlength: "6",
+      style: "letter-spacing:4px;font-weight:700;font-size:18px;text-align:center;width:160px;margin:8px auto;display:block;",
+      required: true,
+    });
+    const errEl = el("p", { class: "form-error", hidden: true, style: "margin-top:10px;" });
+
+    const form = el("form", {
+      onsubmit: async (e) => {
+        e.preventDefault();
+        errEl.hidden = true;
+        try {
+          await api.post("/api/v1/auth/2fa/disable", { code: codeInput.value.trim() });
+          showToast("2FA disabled.", "warn");
+          close();
+          loadCurrentUser().then(() => {
+            const root = document.getElementById("view-root");
+            if (root) renderProfile(root);
+          });
+        } catch (err) {
+          errEl.textContent = err.message || "Invalid verification code.";
+          errEl.hidden = false;
+        }
+      }
+    }, [
+      el("p", { class: "muted small", style: "text-align:center;" }, "Enter a 6-digit TOTP code from your authenticator app to disable 2FA:"),
+      codeInput,
+      errEl,
+      el("div", { style: "display:flex;justify-content:flex-end;gap:10px;margin-top:18px;" }, [
+        el("button", { type: "button", class: "btn btn-outline btn-sm", onclick: close }, "Cancel"),
+        el("button", { type: "submit", class: "btn btn-outline btn-sm", style: "border-color:var(--danger);color:var(--danger);" }, "Disable 2FA")
+      ])
+    ]);
+
+    return [form];
+  });
 }
