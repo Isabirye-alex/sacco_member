@@ -17,6 +17,16 @@
 <link rel="stylesheet" href="css/style.css" />
 <link rel="manifest" href="manifest.json" />
 <meta name="theme-color" content="#12312B" />
+<script>
+  (function() {
+    try {
+      var token = sessionStorage.getItem("sacco_access_token") || localStorage.getItem("sacco_access_token");
+      if (token) {
+        document.documentElement.classList.add("authed-preload");
+      }
+    } catch(e) {}
+  })();
+</script>
 </head>
 <body>
 
