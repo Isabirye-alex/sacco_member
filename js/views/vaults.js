@@ -218,42 +218,42 @@ function openCreateVaultModal(memberId, savingsAccounts) {
         }
       }
     }, [
-      el("div", { class: "field" }, [
-        el("label", {}, "Goal Name / Purpose"),
-        el("input", { id: "v-name", required: true, placeholder: "e.g. Land Purchase 2027, Children School Fees" })
+      el("div", { class: "field", style: "margin-bottom:14px;" }, [
+        el("label", { style: "display:block;margin-bottom:6px;font-weight:600;font-size:13px;color:var(--heading-color);" }, "Goal Name / Purpose"),
+        el("input", { id: "v-name", required: true, placeholder: "e.g. Land Purchase 2027, Children School Fees", style: "width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;" })
       ]),
-      el("div", { class: "field-row" }, [
-        el("div", { class: "field" }, [
-          el("label", {}, "Vault Type"),
-          el("select", { id: "v-type" }, [
+      el("div", { class: "field-row", style: "display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;" }, [
+        el("div", { class: "field", style: "margin:0;" }, [
+          el("label", { style: "display:block;margin-bottom:6px;font-weight:600;font-size:13px;color:var(--heading-color);" }, "Vault Type"),
+          el("select", { id: "v-type", style: "width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;" }, [
             el("option", { value: "GOAL" }, "Target Savings Goal"),
             el("option", { value: "FIXED_DEPOSIT" }, "Fixed Deposit Vault")
           ])
         ]),
-        el("div", { class: "field" }, [
-          el("label", {}, "Target Goal Amount (UGX)"),
-          el("input", { id: "v-target", type: "number", step: "10000", required: true, placeholder: "e.g. 5000000" })
+        el("div", { class: "field", style: "margin:0;" }, [
+          el("label", { style: "display:block;margin-bottom:6px;font-weight:600;font-size:13px;color:var(--heading-color);" }, "Target Goal Amount (UGX)"),
+          el("input", { id: "v-target", type: "number", step: "10000", required: true, placeholder: "e.g. 5000000", style: "width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;" })
         ])
       ]),
-      el("div", { class: "field-row" }, [
-        el("div", { class: "field" }, [
-          el("label", {}, "Lock Period (Months)"),
-          el("select", { id: "v-months" }, [
+      el("div", { class: "field-row", style: "display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;" }, [
+        el("div", { class: "field", style: "margin:0;" }, [
+          el("label", { style: "display:block;margin-bottom:6px;font-weight:600;font-size:13px;color:var(--heading-color);" }, "Lock Period (Months)"),
+          el("select", { id: "v-months", style: "width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;" }, [
             el("option", { value: "3" }, "3 Months (High Yield)"),
             el("option", { value: "6", selected: true }, "6 Months (Standard)"),
             el("option", { value: "12" }, "12 Months (1 Year)"),
             el("option", { value: "24" }, "24 Months (2 Years)")
           ])
         ]),
-        el("div", { class: "field" }, [
-          el("label", {}, "Annual Interest Rate (%)"),
-          el("input", { id: "v-rate", type: "number", step: "0.5", value: "8.5" })
+        el("div", { class: "field", style: "margin:0;" }, [
+          el("label", { style: "display:block;margin-bottom:6px;font-weight:600;font-size:13px;color:var(--heading-color);" }, "Annual Interest Rate (%)"),
+          el("input", { id: "v-rate", type: "number", step: "0.5", value: "8.5", style: "width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;" })
         ])
       ]),
-      el("div", { class: "field" }, [
-        el("label", {}, "Early Withdrawal Penalty (%)"),
-        el("input", { id: "v-penalty", type: "number", step: "0.5", value: "5.0" }),
-        el("div", { class: "field-hint" }, "Penalty applied only if funds are withdrawn before maturity date.")
+      el("div", { class: "field", style: "margin-bottom:14px;" }, [
+        el("label", { style: "display:block;margin-bottom:6px;font-weight:600;font-size:13px;color:var(--heading-color);" }, "Early Withdrawal Penalty (%)"),
+        el("input", { id: "v-penalty", type: "number", step: "0.5", value: "5.0", style: "width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;" }),
+        el("div", { class: "field-hint", style: "font-size:12px;color:var(--ink-400);margin-top:4px;" }, "Penalty applied only if funds are withdrawn before maturity date.")
       ]),
       errorEl,
       el("div", { class: "modal-actions", style: "margin-top:16px;" }, [
