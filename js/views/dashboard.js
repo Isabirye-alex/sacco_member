@@ -23,12 +23,13 @@ export async function renderDashboard(root) {
 
   const memberId = requireMemberProfile();
 
-  let accounts = [], loans = [], holdings = [];
+  let accounts = [], loans = [], holdings = [], newsItems = [];
   try {
-    [accounts, loans, holdings] = await Promise.all([
+    [accounts, loans, holdings, newsItems] = await Promise.all([
       api.get(`/api/v1/savings/members/${memberId}/accounts`),
       api.get(`/api/v1/loans/applications?member_id=${memberId}`),
       api.get(`/api/v1/shares/members/${memberId}/holdings`),
+      api.get(`/api/v1/news`).catch(() => []),
     ]);
   } catch (err) {
     mount(
@@ -48,7 +49,7 @@ export async function renderDashboard(root) {
   const totalShares = holdings.reduce((sum, h) => sum + Number(h.number_of_shares || 0), 0);
   const totalSharesVal = holdings.reduce((sum, h) => sum + Number(h.total_value || (h.number_of_shares * 10000) || 0), 0);
 
-  const ticker = buildNewsTicker();
+  const ticker = buildNewsTicker(newsItems);
 
   const welcomeCard = el("div", { class: "card", style: "display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;" }, [
     el("div", {}, [
@@ -120,15 +121,23 @@ function buildQuickActions() {
 }
 
 /* ── F12: News Ticker ─────────────────────────────────────── */
-function buildNewsTicker() {
-  const announcements = [
-    { icon: "fa-bell", text: "SACCO AGM scheduled for August 30th — all members expected to attend." },
-    { icon: "fa-chart-line", text: "Q2 dividends of 14% approved and will be credited to share accounts by July 25th." },
-    { icon: "fa-hand-holding-dollar", text: "Emergency loan limit increased to UGX 10,000,000 for active members." },
-    { icon: "fa-piggy-bank", text: "New Fixed Deposit product launched — earn up to 16% p.a. on savings above UGX 2M." },
-    { icon: "fa-trophy", text: "Top Savers of Q2 will be awarded at the next member meeting — keep saving!" },
-    { icon: "fa-shield-halved", text: "System upgrade on Saturday 2:00–4:00 AM EAT. Portal may be temporarily unavailable." },
-  ];
+function buildNewsTicker(newsItems = []) {
+  let announcements = [];
+  if (Array.isArray(newsItems) && newsItems.length > 0) {
+    announcements = newsItems.map((n) => ({
+      icon: n.icon || "fa-bell",
+      text: `${n.title} — ${n.content}`,
+    }));
+  } else {
+    announcements = [
+      { icon: "fa-bell", text: "SACCO AGM scheduled for August 30th — all members expected to attend." },
+      { icon: "fa-chart-line", text: "Q2 dividends of 14% approved and will be credited to share accounts by July 25th." },
+      { icon: "fa-hand-holding-dollar", text: "Emergency loan limit increased to UGX 10,000,000 for active members." },
+      { icon: "fa-piggy-bank", text: "New Fixed Deposit product launched — earn up to 16% p.a. on savings above UGX 2M." },
+      { icon: "fa-trophy", text: "Top Savers of Q2 will be awarded at the next member meeting — keep saving!" },
+      { icon: "fa-shield-halved", text: "System upgrade on Saturday 2:00–4:00 AM EAT. Portal may be temporarily unavailable." },
+    ];
+  }
   const track = el("div", { class: "ticker-track" });
   // Double the items so the scroll feels seamless
   [...announcements, ...announcements].forEach(a => {
