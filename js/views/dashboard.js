@@ -130,12 +130,7 @@ function buildNewsTicker(newsItems = []) {
     }));
   } else {
     announcements = [
-      { icon: "fa-bell", text: "SACCO AGM scheduled for August 30th — all members expected to attend." },
-      { icon: "fa-chart-line", text: "Q2 dividends of 14% approved and will be credited to share accounts by July 25th." },
-      { icon: "fa-hand-holding-dollar", text: "Emergency loan limit increased to UGX 10,000,000 for active members." },
-      { icon: "fa-piggy-bank", text: "New Fixed Deposit product launched — earn up to 16% p.a. on savings above UGX 2M." },
-      { icon: "fa-trophy", text: "Top Savers of Q2 will be awarded at the next member meeting — keep saving!" },
-      { icon: "fa-shield-halved", text: "System upgrade on Saturday 2:00–4:00 AM EAT. Portal may be temporarily unavailable." },
+      { icon: "fa-satellite-dish", text: "Welcome to SACCO Member Portal — Stay tuned for official announcements and news updates." },
     ];
   }
   const track = el("div", { class: "ticker-track" });
