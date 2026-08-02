@@ -43,6 +43,7 @@ async function bootstrap() {
   initGlobalSearch();
   initConnectivityMonitor();
   initForgotPassword();
+  initSignupFlow();
   initLockScreen();
   initChatbot();
   initInactivityMonitor();
@@ -297,6 +298,91 @@ function renderVerificationStage(container, email, closeFn) {
   });
   container.appendChild(form);
 }
+
+/* ── Member Registration / Signup Flow ─────────────────── */
+function openRegisterModal(initialRef = "") {
+  openModal("Create Member Account", (closeFn) => {
+    const errorEl = el("p", { class: "form-error", hidden: true });
+    const nameInput = el("input", { type: "text", required: true, placeholder: "e.g. Isabirye Alex", style: "width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--paper);" });
+    const emailInput = el("input", { type: "email", required: true, placeholder: "you@example.com", style: "width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--paper);" });
+    const passInput = el("input", { type: "password", required: true, minlength: 8, placeholder: "Minimum 8 characters", style: "width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--paper);" });
+    const refInput = el("input", { type: "text", value: initialRef, placeholder: "e.g. 04571064 (optional)", style: "width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--paper);" });
+    const submitBtn = el("button", { type: "submit", class: "btn btn-primary" }, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "person_add"), " Create Account"]);
+
+    const form = el("form", {}, [
+      el("p", { class: "muted" }, "Sign up for a new SACCO Member Portal account."),
+      el("div", { class: "field" }, [el("label", {}, "Full Name"), nameInput]),
+      el("div", { class: "field" }, [el("label", {}, "Email Address"), emailInput]),
+      el("div", { class: "field" }, [el("label", {}, "Password"), passInput]),
+      el("div", { class: "field" }, [el("label", {}, "Referral Code"), refInput]),
+      errorEl,
+      el("div", { class: "modal-actions" }, [
+        el("button", { type: "button", class: "btn btn-secondary", onclick: closeFn }, "Cancel"),
+        submitBtn,
+      ])
+    ]);
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorEl.hidden = true;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registering…';
+
+      const email = emailInput.value.trim();
+      const password = passInput.value;
+      const full_name = nameInput.value.trim();
+      const ref = refInput.value.trim() || undefined;
+
+      try {
+        await api.post("/api/v1/auth/register", {
+          email,
+          full_name,
+          password,
+          role: "member",
+          ref,
+        });
+        showToast("Account created successfully! Signing in…", "success");
+        closeFn();
+
+        // Automatically log in
+        await login(email, password, false);
+        renderUserChip();
+        goTo("/dashboard");
+        refreshCurrentRoute();
+      } catch (err) {
+        errorEl.textContent = err.message || "Failed to register account.";
+        errorEl.hidden = false;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:15px;vertical-align:-2px;margin-right:4px;">person_add</span> Create Account';
+      }
+    });
+
+    return [form];
+  });
+}
+
+function initSignupFlow() {
+  const link = document.getElementById("signup-link");
+  if (link) {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const urlParams = new URLSearchParams(window.location.search);
+      const refCode = urlParams.get("ref") || "";
+      openRegisterModal(refCode);
+    });
+  }
+
+  // Auto-open modal if visiting /register or query has ref parameter
+  const params = new URLSearchParams(window.location.search);
+  const refCode = params.get("ref");
+  if (refCode || window.location.pathname.endsWith("/register")) {
+    if (!isAuthenticated()) {
+      setTimeout(() => openRegisterModal(refCode || ""), 300);
+    }
+  }
+}
+
 
 /* ── F20: Session Lock Screen ────────────────────────────── */
 const LOCK_PIN = "1234";
