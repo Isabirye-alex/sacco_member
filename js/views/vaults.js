@@ -1,10 +1,31 @@
 import { api } from "../api.js";
-import { requireMemberProfile } from "../auth.js";
+import { getCurrentUser, loadCurrentUser } from "../auth.js";
 import { el, mount, formatMoney, formatDate, titleCase, openModal, showToast, renderSkeleton } from "../utils.js";
 import { refreshCurrentRoute } from "../router.js";
 
 export async function renderVaults(root) {
-  const memberId = requireMemberProfile();
+  let user = getCurrentUser();
+  if (!user) {
+    try {
+      user = await loadCurrentUser();
+    } catch {
+      user = null;
+    }
+  }
+
+  if (!user?.member_id) {
+    mount(
+      root,
+      el("div", { class: "card empty-state", style: "padding:48px 24px;text-align:center;" }, [
+        el("span", { class: "material-symbols-rounded filled", style: "font-size:48px;color:var(--brass-500);margin-bottom:12px;" }, "person_alert"),
+        el("h3", {}, "No Member Profile Linked"),
+        el("p", { class: "muted", style: "max-width:480px;margin:8px auto;" }, "Your account is not linked to a member profile yet. Ask a SACCO staff member to link your user account to a member profile."),
+      ])
+    );
+    return;
+  }
+
+  const memberId = user.member_id;
 
   renderSkeleton(root, "dashboard");
 

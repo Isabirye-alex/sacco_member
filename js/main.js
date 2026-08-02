@@ -17,6 +17,7 @@ import { renderReferrals } from "./views/referrals.js";
 registerRoute("/dashboard", "Dashboard", renderDashboard);
 registerRoute("/savings", "Savings", renderSavings);
 registerRoute("/vaults", "Target Vaults", renderVaults);
+registerRoute("/vault", "Target Vaults", renderVaults);
 registerRoute("/loans", "Loans", renderLoans);
 registerRoute("/shares", "Shares", renderShares);
 registerRoute("/groups", "Groups", renderGroups);
