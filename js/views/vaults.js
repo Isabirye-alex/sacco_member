@@ -1,6 +1,6 @@
 import { api } from "../api.js";
 import { getCurrentUser, loadCurrentUser } from "../auth.js";
-import { el, mount, formatMoney, formatDate, titleCase, openModal, showToast, renderSkeleton } from "../utils.js";
+import { el, mount, formatMoney, formatDate, titleCase, openModal, showToast, renderSkeleton, setButtonLoadingState } from "../utils.js";
 import { refreshCurrentRoute } from "../router.js";
 
 export async function renderVaults(root) {
