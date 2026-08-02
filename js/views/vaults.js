@@ -183,12 +183,12 @@ function openCreateVaultModal(memberId, savingsAccounts) {
         const submitBtn = form.querySelector("button[type='submit']");
         setButtonLoadingState(submitBtn, true);
 
-        const name = document.getElementById("v-name").value.trim();
-        const vault_type = document.getElementById("v-type").value;
-        const target_amount = parseFloat(document.getElementById("v-target").value || 0);
-        const lock_period_months = parseInt(document.getElementById("v-months").value || 6);
-        const interest_rate_annual = parseFloat(document.getElementById("v-rate").value || 8.5);
-        const early_withdrawal_penalty_pct = parseFloat(document.getElementById("v-penalty").value || 5.0);
+        const name = (form.querySelector("#v-name")?.value || "").trim();
+        const vault_type = form.querySelector("#v-type")?.value || "GOAL";
+        const target_amount = parseFloat(form.querySelector("#v-target")?.value || 0);
+        const lock_period_months = parseInt(form.querySelector("#v-months")?.value || 6);
+        const interest_rate_annual = parseFloat(form.querySelector("#v-rate")?.value || 8.5);
+        const early_withdrawal_penalty_pct = parseFloat(form.querySelector("#v-penalty")?.value || 5.0);
 
         if (!name || target_amount <= 0) {
           errorEl.textContent = "Please enter a valid goal name and target amount.";
@@ -282,7 +282,7 @@ function openDepositVaultModal(vault, savingsAccounts) {
         const submitBtn = form.querySelector("button[type='submit']");
         setButtonLoadingState(submitBtn, true);
 
-        const amount = parseFloat(document.getElementById("vd-amount").value || 0);
+        const amount = parseFloat(form.querySelector("#vd-amount")?.value || 0);
 
         if (amount <= 0) {
           errorEl.textContent = "Please enter a valid deposit amount.";
@@ -337,8 +337,8 @@ function openWithdrawVaultModal(vault, savingsAccounts) {
         const submitBtn = form.querySelector("button[type='submit']");
         setButtonLoadingState(submitBtn, true);
 
-        const amount = parseFloat(document.getElementById("vw-amount").value || 0);
-        const forceEarly = document.getElementById("vw-force") ? document.getElementById("vw-force").checked : false;
+        const amount = parseFloat(form.querySelector("#vw-amount")?.value || 0);
+        const forceEarly = form.querySelector("#vw-force") ? form.querySelector("#vw-force").checked : false;
 
         if (amount <= 0 || amount > Number(vault.current_balance)) {
           errorEl.textContent = `Amount must be between UGX 1 and UGX ${formatMoney(vault.current_balance)}.`;

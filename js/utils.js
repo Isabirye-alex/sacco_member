@@ -28,8 +28,32 @@ export function el(tag, attrs = {}, children = []) {
   for (const [key, value] of Object.entries(attrs || {})) {
     if (key === "class") node.className = value;
     else if (key === "html") node.innerHTML = value;
-    else if (key.startsWith("on") && typeof value === "function") {
-      node.addEventListener(key.slice(2).toLowerCase(), value);
+    else if (key === "style" && typeof value === "object") Object.assign(node.style, value);
+    else if (key === "value" && (tag === "input" || tag === "select" || tag === "option" || tag === "textarea")) {
+      node.value = value;
+      node.setAttribute("value", value);
+    } else if (key === "checked" || key === "selected" || key === "disabled" || key === "readOnly" || key === "hidden") {
+      node[key] = Boolean(value);
+      if (value) node.setAttribute(key, "");
+      else node.removeAttribute(key);
+    } else if (key.startsWith("on") && typeof value === "function") {
+      const eventName = key.slice(2).toLowerCase();
+      node.addEventListener(eventName, async (event) => {
+        const isBtn = node.tagName === "BUTTON" || node.classList.contains("btn");
+        if (eventName === "click" && isBtn) {
+          setButtonLoadingState(node, true);
+        }
+        try {
+          const result = value(event);
+          if (result && typeof result.then === "function") {
+            await result;
+          }
+        } finally {
+          if (eventName === "click" && isBtn) {
+            setButtonLoadingState(node, false);
+          }
+        }
+      });
     } else if (value !== undefined && value !== null && value !== false) {
       node.setAttribute(key, value === true ? "" : value);
     }
@@ -84,15 +108,37 @@ export function setButtonLoadingState(button, loading = true) {
     return;
   }
 
-  button.classList.remove("is-loading");
-  button.removeAttribute("aria-disabled");
-  button.style.pointerEvents = "";
-  const spinner = button.querySelector(".btn-spinner");
-  if (spinner) spinner.remove();
-  activeLoadingButtons.delete(button);
+  const startTime = activeLoadingButtons.get(button);
+  const finish = () => {
+    button.classList.remove("is-loading");
+    button.removeAttribute("aria-disabled");
+    button.style.pointerEvents = "";
+    const spinner = button.querySelector(".btn-spinner");
+    if (spinner) spinner.remove();
+    activeLoadingButtons.delete(button);
+  };
+
+  if (startTime) {
+    const elapsed = Date.now() - startTime;
+    const minTime = 300;
+    const remaining = Math.max(0, minTime - elapsed);
+    if (remaining > 0) setTimeout(finish, remaining);
+    else finish();
+  } else {
+    finish();
+  }
 }
 
 export function initGlobalButtonSpinners() {
+  document.addEventListener("click", (e) => {
+    const btn = e.target?.closest ? e.target.closest("button, .btn, [role='button']") : null;
+    if (!btn || btn.getAttribute("aria-disabled") === "true" || btn.classList.contains("is-loading")) return;
+    setButtonLoadingState(btn, true);
+    setTimeout(() => {
+      setButtonLoadingState(btn, false);
+    }, 400);
+  }, true);
+
   document.addEventListener("submit", (e) => {
     const form = e.target;
     if (!(form instanceof HTMLFormElement)) return;
