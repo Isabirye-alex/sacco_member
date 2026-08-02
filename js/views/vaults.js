@@ -180,17 +180,20 @@ function openCreateVaultModal(memberId, savingsAccounts) {
       onsubmit: async (e) => {
         e.preventDefault();
         errorEl.hidden = true;
+        const submitBtn = form.querySelector("button[type='submit']");
+        setButtonLoadingState(submitBtn, true);
 
         const name = document.getElementById("v-name").value.trim();
         const vault_type = document.getElementById("v-type").value;
         const target_amount = parseFloat(document.getElementById("v-target").value || 0);
         const lock_period_months = parseInt(document.getElementById("v-months").value || 6);
-        const interest_rate_annual = parseFloat(document.getElementById("v-rate").value || 8.0);
+        const interest_rate_annual = parseFloat(document.getElementById("v-rate").value || 8.5);
         const early_withdrawal_penalty_pct = parseFloat(document.getElementById("v-penalty").value || 5.0);
 
         if (!name || target_amount <= 0) {
           errorEl.textContent = "Please enter a valid goal name and target amount.";
           errorEl.hidden = false;
+          setButtonLoadingState(submitBtn, false);
           return;
         }
 
@@ -198,7 +201,7 @@ function openCreateVaultModal(memberId, savingsAccounts) {
           await api.post("/api/v1/vaults", {
             member_id: memberId,
             name,
-            vault_type,
+            vault_type: vault_type === "FIXED_DEPOSIT" ? "FIXED_DEPOSIT" : "GOAL",
             target_amount,
             lock_period_months,
             interest_rate_annual,
@@ -210,6 +213,8 @@ function openCreateVaultModal(memberId, savingsAccounts) {
         } catch (err) {
           errorEl.textContent = err.message || "Failed to create vault.";
           errorEl.hidden = false;
+        } finally {
+          setButtonLoadingState(submitBtn, false);
         }
       }
     }, [
@@ -219,13 +224,10 @@ function openCreateVaultModal(memberId, savingsAccounts) {
       ]),
       el("div", { class: "field-row" }, [
         el("div", { class: "field" }, [
-          el("label", {}, "Vault Category"),
+          el("label", {}, "Vault Type"),
           el("select", { id: "v-type" }, [
-            el("option", { value: "emergency" }, "Emergency Fund"),
-            el("option", { value: "education" }, "School Fees / Education"),
-            el("option", { value: "business" }, "Business Expansion"),
-            el("option", { value: "asset_purchase" }, "Asset / Land Purchase"),
-            el("option", { value: "custom" }, "Custom Goal")
+            el("option", { value: "GOAL" }, "Target Savings Goal"),
+            el("option", { value: "FIXED_DEPOSIT" }, "Fixed Deposit Vault")
           ])
         ]),
         el("div", { class: "field" }, [
@@ -277,12 +279,15 @@ function openDepositVaultModal(vault, savingsAccounts) {
       onsubmit: async (e) => {
         e.preventDefault();
         errorEl.hidden = true;
+        const submitBtn = form.querySelector("button[type='submit']");
+        setButtonLoadingState(submitBtn, true);
 
         const amount = parseFloat(document.getElementById("vd-amount").value || 0);
 
         if (amount <= 0) {
           errorEl.textContent = "Please enter a valid deposit amount.";
           errorEl.hidden = false;
+          setButtonLoadingState(submitBtn, false);
           return;
         }
 
@@ -294,6 +299,8 @@ function openDepositVaultModal(vault, savingsAccounts) {
         } catch (err) {
           errorEl.textContent = err.message || "Deposit failed.";
           errorEl.hidden = false;
+        } finally {
+          setButtonLoadingState(submitBtn, false);
         }
       }
     }, [
@@ -327,6 +334,8 @@ function openWithdrawVaultModal(vault, savingsAccounts) {
       onsubmit: async (e) => {
         e.preventDefault();
         errorEl.hidden = true;
+        const submitBtn = form.querySelector("button[type='submit']");
+        setButtonLoadingState(submitBtn, true);
 
         const amount = parseFloat(document.getElementById("vw-amount").value || 0);
         const forceEarly = document.getElementById("vw-force") ? document.getElementById("vw-force").checked : false;
@@ -334,6 +343,7 @@ function openWithdrawVaultModal(vault, savingsAccounts) {
         if (amount <= 0 || amount > Number(vault.current_balance)) {
           errorEl.textContent = `Amount must be between UGX 1 and UGX ${formatMoney(vault.current_balance)}.`;
           errorEl.hidden = false;
+          setButtonLoadingState(submitBtn, false);
           return;
         }
 
@@ -348,6 +358,8 @@ function openWithdrawVaultModal(vault, savingsAccounts) {
         } catch (err) {
           errorEl.textContent = err.message || "Withdrawal failed.";
           errorEl.hidden = false;
+        } finally {
+          setButtonLoadingState(submitBtn, false);
         }
       }
     }, [

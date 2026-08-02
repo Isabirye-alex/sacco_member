@@ -61,6 +61,48 @@ export function showToast(message, type = "default") {
   setTimeout(() => toast.remove(), 4200);
 }
 
+const activeLoadingButtons = new Map();
+
+export function setButtonLoadingState(button, loading = true) {
+  if (!button || !(button instanceof HTMLElement)) return;
+
+  if (loading) {
+    if (activeLoadingButtons.has(button)) return;
+
+    button.classList.add("is-loading");
+    button.setAttribute("aria-disabled", "true");
+    button.style.pointerEvents = "none";
+
+    let spinner = button.querySelector(".btn-spinner");
+    if (!spinner) {
+      spinner = document.createElement("span");
+      spinner.className = "btn-spinner";
+      spinner.setAttribute("aria-hidden", "true");
+      button.prepend(spinner);
+    }
+    activeLoadingButtons.set(button, Date.now());
+    return;
+  }
+
+  button.classList.remove("is-loading");
+  button.removeAttribute("aria-disabled");
+  button.style.pointerEvents = "";
+  const spinner = button.querySelector(".btn-spinner");
+  if (spinner) spinner.remove();
+  activeLoadingButtons.delete(button);
+}
+
+export function initGlobalButtonSpinners() {
+  document.addEventListener("submit", (e) => {
+    const form = e.target;
+    if (!(form instanceof HTMLFormElement)) return;
+    const submitBtn = form.querySelector("button[type='submit'], input[type='submit']");
+    if (submitBtn) {
+      setButtonLoadingState(submitBtn, true);
+    }
+  }, true);
+}
+
 export function clearNode(node) {
   while (node.firstChild) node.removeChild(node.firstChild);
 }

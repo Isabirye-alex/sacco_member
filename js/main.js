@@ -1,6 +1,6 @@
 import { login, logout, isAuthenticated, loadCurrentUser, getCurrentUser } from "./auth.js";
 import { registerRoute, startRouter, goTo, refreshCurrentRoute } from "./router.js";
-import { showToast, titleCase, el, openModal, clearNode } from "./utils.js";
+import { showToast, titleCase, el, openModal, clearNode, initGlobalButtonSpinners } from "./utils.js";
 import { API_BASE_URL } from "./config.js";
 
 import { renderDashboard } from "./views/dashboard.js";
@@ -50,6 +50,7 @@ async function bootstrap() {
   initLockScreen();
   initChatbot();
   initInactivityMonitor();
+  initGlobalButtonSpinners();
 
   if (isAuthenticated()) {
     try {
