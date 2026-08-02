@@ -362,23 +362,36 @@ function openRegisterModal(initialRef = "") {
   });
 }
 
+function getRefCodeFromUrl() {
+  const searchParams = new URLSearchParams(window.location.search);
+  if (searchParams.has("ref")) return searchParams.get("ref");
+
+  if (window.location.hash && window.location.hash.includes("ref=")) {
+    const hashQuery = window.location.hash.split("?")[1];
+    if (hashQuery) {
+      const hashParams = new URLSearchParams(hashQuery);
+      if (hashParams.has("ref")) return hashParams.get("ref");
+    }
+  }
+  return "";
+}
+
 function initSignupFlow() {
   const link = document.getElementById("signup-link");
   if (link) {
     link.addEventListener("click", (e) => {
       e.preventDefault();
-      const urlParams = new URLSearchParams(window.location.search);
-      const refCode = urlParams.get("ref") || "";
+      const refCode = getRefCodeFromUrl();
       openRegisterModal(refCode);
     });
   }
 
-  // Auto-open modal if visiting /register or query has ref parameter
-  const params = new URLSearchParams(window.location.search);
-  const refCode = params.get("ref");
-  if (refCode || window.location.pathname.endsWith("/register")) {
+  // Auto-open modal if visiting with a referral code or register route
+  const refCode = getRefCodeFromUrl();
+  const isRegisterRoute = window.location.pathname.endsWith("/register") || window.location.hash.includes("register");
+  if (refCode || isRegisterRoute) {
     if (!isAuthenticated()) {
-      setTimeout(() => openRegisterModal(refCode || ""), 300);
+      setTimeout(() => openRegisterModal(refCode), 300);
     }
   }
 }
