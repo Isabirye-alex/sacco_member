@@ -170,7 +170,10 @@ export function openModal(title, buildBody) {
     if (e.target === backdrop) close();
   });
 
-  const modal = el("div", { class: "modal" }, [el("h3", {}, title), ...buildBody(close)]);
+  const bodyContent = buildBody(close);
+  const kids = Array.isArray(bodyContent) ? bodyContent : [bodyContent];
+
+  const modal = el("div", { class: "modal" }, [el("h3", {}, title), ...kids]);
   backdrop.appendChild(modal);
   document.body.appendChild(backdrop);
   return close;
