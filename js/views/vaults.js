@@ -199,7 +199,7 @@ function openCreateVaultModal(memberId, savingsAccounts) {
 
         try {
           await api.post("/api/v1/vaults", {
-            member_id: memberId,
+            member_id: memberId || user?.member_id,
             name,
             vault_type: vault_type === "FIXED_DEPOSIT" ? "FIXED_DEPOSIT" : "GOAL",
             target_amount,
