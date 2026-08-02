@@ -112,6 +112,7 @@ function buildQuickActions() {
     el("div", { class: "card-header" }, [el("h3", {}, [el("i", { class: "fa-solid fa-bolt" }), " Quick Actions"])]),
     el("div", { style: "display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px;" }, [
       el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/savings") }, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "account_balance"), " Savings Portal"]),
+      el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/vaults") }, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "lock_clock"), " Target Vaults"]),
       el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/loans") }, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "payments"), " Apply for Loan"]),
       el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/groups") }, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "groups"), " Table Banking"]),
       el("button", { class: "btn btn-secondary btn-block", onclick: () => goTo("/tools") }, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "construction"), " Member Tools"]),

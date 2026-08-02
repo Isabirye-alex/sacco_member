@@ -95,6 +95,7 @@ function updateThemeButton(theme) {
 const SEARCHABLE_ROUTES = [
   { path: "/dashboard", label: "Dashboard", icon: "dashboard", keywords: ["home", "overview", "summary"] },
   { path: "/savings", label: "Savings", icon: "savings", keywords: ["accounts", "deposit", "withdraw", "balance"] },
+  { path: "/vaults", label: "Target Vaults", icon: "lock_clock", keywords: ["vault", "lock", "target", "goal", "emergency", "education"] },
   { path: "/loans", label: "Loans", icon: "request_quote", keywords: ["apply", "borrow", "repayment", "guarantor"] },
   { path: "/shares", label: "Shares", icon: "trending_up", keywords: ["dividends", "holdings"] },
   { path: "/groups", label: "Groups", icon: "groups", keywords: ["table banking", "contributions", "chama"] },
