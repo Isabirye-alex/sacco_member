@@ -5,6 +5,7 @@ import { API_BASE_URL } from "./config.js";
 
 import { renderDashboard } from "./views/dashboard.js";
 import { renderSavings } from "./views/savings.js";
+import { renderVaults } from "./views/vaults.js";
 import { renderLoans } from "./views/loans.js";
 import { renderShares } from "./views/shares.js";
 import { renderGroups } from "./views/groups.js";
@@ -15,6 +16,7 @@ import { renderReferrals } from "./views/referrals.js";
 
 registerRoute("/dashboard", "Dashboard", renderDashboard);
 registerRoute("/savings", "Savings", renderSavings);
+registerRoute("/vaults", "Target Vaults", renderVaults);
 registerRoute("/loans", "Loans", renderLoans);
 registerRoute("/shares", "Shares", renderShares);
 registerRoute("/groups", "Groups", renderGroups);
