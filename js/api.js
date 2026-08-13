@@ -67,7 +67,18 @@ function extractErrorMessage(body) {
   if (!body) return "Something went wrong. Please try again.";
   if (typeof body.detail === "string") return body.detail;
   if (Array.isArray(body.detail)) {
-    return body.detail.map((d) => d.msg || JSON.stringify(d)).join(" ");
+    return body.detail
+      .map((d) => {
+        if (typeof d === "string") return d;
+        const field = Array.isArray(d.loc)
+          ? d.loc
+              .filter((x) => x !== "body" && x !== "query" && x !== "path")
+              .map((s) => String(s).replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()))
+              .join(" ")
+          : "";
+        return field ? `${field}: ${d.msg}` : d.msg || JSON.stringify(d);
+      })
+      .join(" | ");
   }
   return body.message || "Something went wrong. Please try again.";
 }

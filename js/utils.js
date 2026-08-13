@@ -28,8 +28,32 @@ export function el(tag, attrs = {}, children = []) {
   for (const [key, value] of Object.entries(attrs || {})) {
     if (key === "class") node.className = value;
     else if (key === "html") node.innerHTML = value;
-    else if (key.startsWith("on") && typeof value === "function") {
-      node.addEventListener(key.slice(2).toLowerCase(), value);
+    else if (key === "style" && typeof value === "object") Object.assign(node.style, value);
+    else if (key === "value" && (tag === "input" || tag === "select" || tag === "option" || tag === "textarea")) {
+      node.value = value;
+      node.setAttribute("value", value);
+    } else if (key === "checked" || key === "selected" || key === "disabled" || key === "readOnly" || key === "hidden") {
+      node[key] = Boolean(value);
+      if (value) node.setAttribute(key, "");
+      else node.removeAttribute(key);
+    } else if (key.startsWith("on") && typeof value === "function") {
+      const eventName = key.slice(2).toLowerCase();
+      node.addEventListener(eventName, async (event) => {
+        const isBtn = node.tagName === "BUTTON" || node.classList.contains("btn");
+        if (eventName === "click" && isBtn) {
+          setButtonLoadingState(node, true);
+        }
+        try {
+          const result = value(event);
+          if (result && typeof result.then === "function") {
+            await result;
+          }
+        } finally {
+          if (eventName === "click" && isBtn) {
+            setButtonLoadingState(node, false);
+          }
+        }
+      });
     } else if (value !== undefined && value !== null && value !== false) {
       node.setAttribute(key, value === true ? "" : value);
     }
@@ -61,6 +85,70 @@ export function showToast(message, type = "default") {
   setTimeout(() => toast.remove(), 4200);
 }
 
+const activeLoadingButtons = new Map();
+
+export function setButtonLoadingState(button, loading = true) {
+  if (!button || !(button instanceof HTMLElement)) return;
+
+  if (loading) {
+    if (activeLoadingButtons.has(button)) return;
+
+    button.classList.add("is-loading");
+    button.setAttribute("aria-disabled", "true");
+    button.style.pointerEvents = "none";
+
+    let spinner = button.querySelector(".btn-spinner");
+    if (!spinner) {
+      spinner = document.createElement("span");
+      spinner.className = "btn-spinner";
+      spinner.setAttribute("aria-hidden", "true");
+      button.prepend(spinner);
+    }
+    activeLoadingButtons.set(button, Date.now());
+    return;
+  }
+
+  const startTime = activeLoadingButtons.get(button);
+  const finish = () => {
+    button.classList.remove("is-loading");
+    button.removeAttribute("aria-disabled");
+    button.style.pointerEvents = "";
+    const spinner = button.querySelector(".btn-spinner");
+    if (spinner) spinner.remove();
+    activeLoadingButtons.delete(button);
+  };
+
+  if (startTime) {
+    const elapsed = Date.now() - startTime;
+    const minTime = 300;
+    const remaining = Math.max(0, minTime - elapsed);
+    if (remaining > 0) setTimeout(finish, remaining);
+    else finish();
+  } else {
+    finish();
+  }
+}
+
+export function initGlobalButtonSpinners() {
+  document.addEventListener("click", (e) => {
+    const btn = e.target?.closest ? e.target.closest("button, .btn, [role='button']") : null;
+    if (!btn || btn.getAttribute("aria-disabled") === "true" || btn.classList.contains("is-loading")) return;
+    setButtonLoadingState(btn, true);
+    setTimeout(() => {
+      setButtonLoadingState(btn, false);
+    }, 400);
+  }, true);
+
+  document.addEventListener("submit", (e) => {
+    const form = e.target;
+    if (!(form instanceof HTMLFormElement)) return;
+    const submitBtn = form.querySelector("button[type='submit'], input[type='submit']");
+    if (submitBtn) {
+      setButtonLoadingState(submitBtn, true);
+    }
+  }, true);
+}
+
 export function clearNode(node) {
   while (node.firstChild) node.removeChild(node.firstChild);
 }
@@ -82,7 +170,10 @@ export function openModal(title, buildBody) {
     if (e.target === backdrop) close();
   });
 
-  const modal = el("div", { class: "modal" }, [el("h3", {}, title), ...buildBody(close)]);
+  const bodyContent = buildBody(close);
+  const kids = Array.isArray(bodyContent) ? bodyContent : [bodyContent];
+
+  const modal = el("div", { class: "modal" }, [el("h3", {}, title), ...kids]);
   backdrop.appendChild(modal);
   document.body.appendChild(backdrop);
   return close;

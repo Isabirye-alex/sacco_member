@@ -20,6 +20,7 @@ async function renderRoute() {
   const appShell = document.getElementById("app-shell");
 
   if (!authed) {
+    document.documentElement.classList.remove("authed-preload");
     loginScreen.hidden = false;
     appShell.hidden = true;
     document.getElementById("view-root").innerHTML = "";

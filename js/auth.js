@@ -60,6 +60,7 @@ export async function login(email, password, remember = false) {
 
 export function logout() {
   if (inactivityTimer) clearTimeout(inactivityTimer);
+  document.documentElement.classList.remove("authed-preload");
   tokenStore.clear();
   currentUser = null;
   currentMember = null;

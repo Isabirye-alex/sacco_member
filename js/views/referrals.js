@@ -3,9 +3,7 @@ import { requireMemberProfile } from "../auth.js";
 import { el, mount, formatDateTime, formatMoney, badge, showToast } from "../utils.js";
 import { refreshCurrentRoute } from "../router.js";
 
-/* Point this at whatever route your existing public sign-up page lives on.
-   The referral code is appended as a query param: /register?ref=CODE */
-const REGISTER_PATH = "/register";
+const REGISTER_PATH = "";
 
 /* ------------------------------------------------------------------ */
 /* Icons                                                               */

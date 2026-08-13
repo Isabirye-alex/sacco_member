@@ -352,14 +352,26 @@ function openApplyModal(memberId, products) {
       const guarantors = [];
 
       try {
+        if (!amount || amount <= 0) {
+          throw new Error("Please enter a valid loan amount greater than 0.");
+        }
+        if (!months || months <= 0) {
+          throw new Error("Please enter a valid repayment term (months).");
+        }
+        if (amount > product.max_amount) {
+          throw new Error(`Requested amount exceeds product maximum of UGX ${formatMoney(product.max_amount)}.`);
+        }
+
         for (const row of guarantorRowEls) {
           const gId = row.dataset.guarantorMemberId;
-          const gNumber = row.dataset.guarantorMemberNumber;
           const amountGuaranteed = Number(row.querySelector(".guarantor-amount").value);
           if (!gId) {
             throw new Error("Please search and select a valid active member for all guarantor fields.");
           }
-          guarantors.push({ guarantor_member_id: gId, amount_guaranteed: amountGuaranteed || 0 });
+          if (!amountGuaranteed || amountGuaranteed <= 0) {
+            throw new Error("Guaranteed amount must be greater than 0 for all guarantors.");
+          }
+          guarantors.push({ guarantor_member_id: gId, amount_guaranteed: amountGuaranteed });
         }
 
         if (product.requires_guarantors && guarantors.length < product.min_guarantors) {

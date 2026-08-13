@@ -1,10 +1,11 @@
 import { login, logout, isAuthenticated, loadCurrentUser, getCurrentUser } from "./auth.js";
 import { registerRoute, startRouter, goTo, refreshCurrentRoute } from "./router.js";
-import { showToast, titleCase, el, openModal, clearNode } from "./utils.js";
+import { showToast, titleCase, el, openModal, clearNode, initGlobalButtonSpinners } from "./utils.js";
 import { API_BASE_URL } from "./config.js";
 
 import { renderDashboard } from "./views/dashboard.js";
 import { renderSavings } from "./views/savings.js";
+import { renderVaults } from "./views/vaults.js";
 import { renderLoans } from "./views/loans.js";
 import { renderShares } from "./views/shares.js";
 import { renderGroups } from "./views/groups.js";
@@ -15,6 +16,8 @@ import { renderReferrals } from "./views/referrals.js";
 
 registerRoute("/dashboard", "Dashboard", renderDashboard);
 registerRoute("/savings", "Savings", renderSavings);
+registerRoute("/vaults", "Target Vaults", renderVaults);
+registerRoute("/vault", "Target Vaults", renderVaults);
 registerRoute("/loans", "Loans", renderLoans);
 registerRoute("/shares", "Shares", renderShares);
 registerRoute("/groups", "Groups", renderGroups);
@@ -43,9 +46,11 @@ async function bootstrap() {
   initGlobalSearch();
   initConnectivityMonitor();
   initForgotPassword();
+  initSignupFlow();
   initLockScreen();
   initChatbot();
   initInactivityMonitor();
+  initGlobalButtonSpinners();
 
   if (isAuthenticated()) {
     try {
@@ -92,6 +97,7 @@ function updateThemeButton(theme) {
 const SEARCHABLE_ROUTES = [
   { path: "/dashboard", label: "Dashboard", icon: "dashboard", keywords: ["home", "overview", "summary"] },
   { path: "/savings", label: "Savings", icon: "savings", keywords: ["accounts", "deposit", "withdraw", "balance"] },
+  { path: "/vaults", label: "Target Vaults", icon: "lock_clock", keywords: ["vault", "lock", "target", "goal", "emergency", "education"] },
   { path: "/loans", label: "Loans", icon: "request_quote", keywords: ["apply", "borrow", "repayment", "guarantor"] },
   { path: "/shares", label: "Shares", icon: "trending_up", keywords: ["dividends", "holdings"] },
   { path: "/groups", label: "Groups", icon: "groups", keywords: ["table banking", "contributions", "chama"] },
@@ -297,6 +303,104 @@ function renderVerificationStage(container, email, closeFn) {
   });
   container.appendChild(form);
 }
+
+/* ── Member Registration / Signup Flow ─────────────────── */
+function openRegisterModal(initialRef = "") {
+  openModal("Create Member Account", (closeFn) => {
+    const errorEl = el("p", { class: "form-error", hidden: true });
+    const nameInput = el("input", { type: "text", required: true, placeholder: "e.g. Isabirye Alex", style: "width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--paper);" });
+    const emailInput = el("input", { type: "email", required: true, placeholder: "you@example.com", style: "width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--paper);" });
+    const passInput = el("input", { type: "password", required: true, minlength: 8, placeholder: "Minimum 8 characters", style: "width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--paper);" });
+    const refInput = el("input", { type: "text", value: initialRef, placeholder: "e.g. 04571064 (optional)", style: "width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--paper);" });
+    const submitBtn = el("button", { type: "submit", class: "btn btn-primary" }, [el("span", { class: "material-symbols-rounded", style: "font-size:15px;vertical-align:-2px;margin-right:4px;" }, "person_add"), " Create Account"]);
+
+    const form = el("form", {}, [
+      el("p", { class: "muted" }, "Sign up for a new SACCO Member Portal account."),
+      el("div", { class: "field" }, [el("label", {}, "Full Name"), nameInput]),
+      el("div", { class: "field" }, [el("label", {}, "Email Address"), emailInput]),
+      el("div", { class: "field" }, [el("label", {}, "Password"), passInput]),
+      el("div", { class: "field" }, [el("label", {}, "Referral Code"), refInput]),
+      errorEl,
+      el("div", { class: "modal-actions" }, [
+        el("button", { type: "button", class: "btn btn-secondary", onclick: closeFn }, "Cancel"),
+        submitBtn,
+      ])
+    ]);
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorEl.hidden = true;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registering…';
+
+      const email = emailInput.value.trim();
+      const password = passInput.value;
+      const full_name = nameInput.value.trim();
+      const ref = refInput.value.trim() || undefined;
+
+      try {
+        await api.post("/api/v1/auth/register", {
+          email,
+          full_name,
+          password,
+          role: "member",
+          ref,
+        });
+        showToast("Account created successfully! Signing in…", "success");
+        closeFn();
+
+        // Automatically log in
+        await login(email, password, false);
+        renderUserChip();
+        goTo("/dashboard");
+        refreshCurrentRoute();
+      } catch (err) {
+        errorEl.textContent = err.message || "Failed to register account.";
+        errorEl.hidden = false;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:15px;vertical-align:-2px;margin-right:4px;">person_add</span> Create Account';
+      }
+    });
+
+    return [form];
+  });
+}
+
+function getRefCodeFromUrl() {
+  const searchParams = new URLSearchParams(window.location.search);
+  if (searchParams.has("ref")) return searchParams.get("ref");
+
+  if (window.location.hash && window.location.hash.includes("ref=")) {
+    const hashQuery = window.location.hash.split("?")[1];
+    if (hashQuery) {
+      const hashParams = new URLSearchParams(hashQuery);
+      if (hashParams.has("ref")) return hashParams.get("ref");
+    }
+  }
+  return "";
+}
+
+function initSignupFlow() {
+  const link = document.getElementById("signup-link");
+  if (link) {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const refCode = getRefCodeFromUrl();
+      openRegisterModal(refCode);
+    });
+  }
+
+  // Auto-open modal if visiting with a referral code or register route
+  const refCode = getRefCodeFromUrl();
+  const isRegisterRoute = window.location.pathname.endsWith("/register") || window.location.hash.includes("register");
+  if (refCode || isRegisterRoute) {
+    if (!isAuthenticated()) {
+      setTimeout(() => openRegisterModal(refCode), 300);
+    }
+  }
+}
+
 
 /* ── F20: Session Lock Screen ────────────────────────────── */
 const LOCK_PIN = "1234";
