@@ -15,6 +15,64 @@
 <!-- FontAwesome 6 Free -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <link rel="stylesheet" href="css/style.css" />
+
+<style>
+  /* Organized Brand-Mark Styles */
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+
+  .brand h1 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.2;
+    color: var(--ink-900, #1c2320);
+  }
+
+  .brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--pine-700, #1b4b43), var(--pine-900, #0f2d28));
+    color: var(--brass-400, #c89b3c);
+    box-shadow: 0 4px 12px rgba(27, 75, 67, 0.2);
+    flex-shrink: 0;
+  }
+
+  .brand-mark .material-symbols-rounded {
+    font-size: 24px;
+  }
+
+  /* Sidebar Brand Specifics */
+  .brand-sidebar {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .brand-sidebar span.brand-text {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--ink-100, #f0f4f2);
+  }
+
+  .brand-sidebar .brand-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+
+  .brand-sidebar .brand-mark .material-symbols-rounded {
+    font-size: 20px;
+  }
+</style>
 </head>
 <body>
 
@@ -22,7 +80,9 @@
   <div id="login-screen" class="auth-screen">
     <div class="auth-card">
       <div class="brand">
-        <div class="brand-mark"><span class="material-symbols-rounded filled">savings</span></div>
+        <div class="brand-mark">
+          <span class="material-symbols-rounded filled">savings</span>
+        </div>
         <h1>SACCO Member Portal</h1>
       </div>
       <p class="muted">Sign in to manage your savings, loans, and shares.</p>
@@ -51,8 +111,10 @@
   <div id="app-shell" hidden>
     <aside class="sidebar">
       <div class="brand brand-sidebar">
-        <div class="brand-mark"><span class="material-symbols-rounded filled">savings</span></div>
-        <span>SACCO</span>
+        <div class="brand-mark">
+          <span class="material-symbols-rounded filled">savings</span>
+        </div>
+        <span class="brand-text">SACCO</span>
       </div>
       <nav id="nav-links">
         <a href="#/dashboard" data-route="dashboard"><i class="fa-solid fa-gauge-high nav-icon"></i>Dashboard</a>
