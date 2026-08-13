@@ -49,32 +49,70 @@
 
   <!-- App shell (shown once authenticated) -->
   <div id="app-shell" hidden>
-    <aside class="sidebar">
-      <div class="brand brand-sidebar">
-        <div class="brand-mark"><span class="material-symbols-rounded filled">savings</span></div>
-        <span>SACCO</span>
+  <aside class="sidebar">
+    <!-- Organized Brand Header -->
+    <div class="brand brand-sidebar">
+      <div class="brand-mark">
+        <span class="material-symbols-rounded">savings</span>
       </div>
-      <nav id="nav-links">
-        <a href="#/dashboard" data-route="dashboard"><i class="fa-solid fa-gauge-high nav-icon"></i>Dashboard</a>
-        <a href="#/savings" data-route="savings"><i class="fa-solid fa-vault nav-icon"></i>Savings</a>
-        <a href="#/loans" data-route="loans"><i class="fa-solid fa-hand-holding-dollar nav-icon"></i>Loans</a>
-        <a href="#/shares" data-route="shares"><i class="fa-solid fa-chart-pie nav-icon"></i>Shares</a>
-        <a href="#/groups" data-route="groups"><i class="fa-solid fa-people-group nav-icon"></i>Groups</a>
-        <a href="#/notifications" data-route="notifications"><i class="fa-solid fa-bell nav-icon"></i>Notifications</a>
-        <a href="#/tools" data-route="tools"><i class="fa-solid fa-screwdriver-wrench nav-icon"></i>Member Tools</a>
-        <a href="#/referrals" data-route="referrals"><i class="fa-solid fa-user-plus nav-icon"></i>Invite &amp; Earn</a>
-        <a href="#/profile" data-route="profile"><i class="fa-solid fa-circle-user nav-icon"></i>Profile</a>
-      </nav>
-      <div class="sidebar-footer">
-        <div id="user-chip" class="user-chip"></div>
-        <button id="theme-toggle-btn" class="theme-switch-btn">
-          <span class="theme-icon"><i class="fa-solid fa-sun"></i></span>
-          <span class="theme-label">Light Mode</span>
-        </button>
-        <button id="lock-session-btn" class="btn btn-ghost btn-block" style="margin-top:6px; color: var(--brass-500);"><i class="fa-solid fa-shield-halved"></i> Lock Session</button>
-        <button id="logout-btn" class="btn btn-ghost btn-block" style="margin-top:4px;"><i class="fa-solid fa-right-from-bracket"></i> Log out</button>
-      </div>
-    </aside>
+      <span class="brand-title">SACCO</span>
+    </div>
+
+    <!-- Navigation Links with Spaced Icons -->
+    <nav id="nav-links">
+      <a href="#/dashboard" data-route="dashboard">
+        <i class="fa-solid fa-gauge-high nav-icon"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="#/savings" data-route="savings">
+        <i class="fa-solid fa-vault nav-icon"></i>
+        <span>Savings</span>
+      </a>
+      <a href="#/loans" data-route="loans">
+        <i class="fa-solid fa-hand-holding-dollar nav-icon"></i>
+        <span>Loans</span>
+      </a>
+      <a href="#/shares" data-route="shares">
+        <i class="fa-solid fa-chart-pie nav-icon"></i>
+        <span>Shares</span>
+      </a>
+      <a href="#/groups" data-route="groups">
+        <i class="fa-solid fa-people-group nav-icon"></i>
+        <span>Groups</span>
+      </a>
+      <a href="#/notifications" data-route="notifications">
+        <i class="fa-solid fa-bell nav-icon"></i>
+        <span>Notifications</span>
+      </a>
+      <a href="#/tools" data-route="tools">
+        <i class="fa-solid fa-screwdriver-wrench nav-icon"></i>
+        <span>Member Tools</span>
+      </a>
+      <a href="#/referrals" data-route="referrals">
+        <i class="fa-solid fa-user-plus nav-icon"></i>
+        <span>Invite &amp; Earn</span>
+      </a>
+      <a href="#/profile" data-route="profile">
+        <i class="fa-solid fa-circle-user nav-icon"></i>
+        <span>Profile</span>
+      </a>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <div id="user-chip" class="user-chip"></div>
+      <button id="theme-toggle-btn" class="theme-switch-btn">
+        <span class="theme-icon"><i class="fa-solid fa-sun"></i></span>
+        <span class="theme-label">Light Mode</span>
+      </button>
+      <button id="lock-session-btn" class="btn btn-ghost btn-block" style="margin-top:6px; color: var(--brass-500, #d97706);">
+        <i class="fa-solid fa-shield-halved"></i> <span>Lock Session</span>
+      </button>
+      <button id="logout-btn" class="btn btn-ghost btn-block" style="margin-top:4px;">
+        <i class="fa-solid fa-right-from-bracket"></i> <span>Log out</span>
+      </button>
+    </div>
+  </aside>
 
     <div class="main-col">
       <header class="topbar">

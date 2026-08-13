@@ -1746,3 +1746,80 @@ input[type="range"]::-moz-range-thumb {
 .repayment-principal { background: var(--pine-700); transition: flex 0.5s ease; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #fff; }
 .repayment-interest { background: var(--brass-500); transition: flex 0.5s ease; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #12312B; }
 
+
+
+
+
+/* Sidebar Header & Brand Mark Layout */
+.brand-sidebar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 12px;
+}
+
+.brand-sidebar .brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--pine-700, #1b4b43);
+  color: var(--brass-500, #d97706);
+  flex-shrink: 0;
+}
+
+.brand-sidebar .brand-mark .material-symbols-rounded {
+  font-size: 24px;
+  font-variation-settings: 'FILL' 1, 'wght' 600;
+}
+
+.brand-sidebar .brand-title {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* Nav Links & Icon Alignment */
+#nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 12px;
+}
+
+#nav-links a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: #e5e7eb;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+#nav-links a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+#nav-links a.active {
+  background-color: var(--pine-700, #1b4b43);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Fixed-width icons keep all menu text perfectly aligned vertically */
+.nav-icon {
+  width: 20px;
+  font-size: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
