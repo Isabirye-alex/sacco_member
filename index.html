@@ -100,34 +100,20 @@
   </a>
 </nav>
 
-<!-- Sidebar Footer -->
-<div class="sidebar-footer">
-  <div id="user-chip" class="user-chip"></div>
-
-  <!-- Theme Toggle Button -->
-  <button id="theme-toggle-btn" class="sidebar-btn theme-switch-btn" type="button">
-    <svg class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-    </svg>
-    <span class="theme-label">Light Mode</span>
-  </button>
-
-  <!-- Lock Session Button -->
-  <button id="lock-session-btn" class="sidebar-btn lock-btn" type="button">
-    <svg class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-    </svg>
-    <span>Lock Session</span>
-  </button>
-
-  <!-- Log Out Button -->
-  <button id="logout-btn" class="sidebar-btn logout-btn" type="button">
-    <svg class="btn-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-    </svg>
-    <span>Log out</span>
-  </button>
-</div>
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <div id="user-chip" class="user-chip"></div>
+      <button id="theme-toggle-btn" class="theme-switch-btn">
+        <span class="theme-icon"><i class="fa-solid fa-sun"></i></span>
+        <span class="theme-label">Light Mode</span>
+      </button>
+      <button id="lock-session-btn" class="btn btn-ghost btn-block" style="margin-top:6px; color: var(--brass-500, #d97706);">
+        <i class="fa-solid fa-shield-halved"></i> <span>Lock Session</span>
+      </button>
+      <button id="logout-btn" class="btn btn-ghost btn-block" style="margin-top:4px;">
+        <i class="fa-solid fa-right-from-bracket"></i> <span>Log out</span>
+      </button>
+    </div>
   </aside>
 
     <div class="main-col">
