@@ -20,6 +20,17 @@
 <link rel="stylesheet" href="css/style.css" />
 
 <style>
+  /* Base Contrast Adjustments */
+  body {
+    color: #111827;
+  }
+
+  .material-symbols-rounded {
+    font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+    display: inline-block;
+    line-height: 1;
+  }
+
   /* Organized Brand & Brand Mark Styles */
   .brand {
     display: flex;
@@ -41,9 +52,9 @@
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: var(--pine-700, #1b4b43);
-    color: var(--brass-500, #c89b3c);
-    box-shadow: 0 4px 12px rgba(27, 75, 67, 0.15);
+    background: #1b4b43;
+    color: #d97706;
+    box-shadow: 0 4px 12px rgba(27, 75, 67, 0.2);
     flex-shrink: 0;
   }
 
@@ -51,13 +62,18 @@
     font-size: 26px;
   }
 
-  /* Sidebar Brand Header Alignment */
+  /* Sidebar Brand Header Alignment & Contrast */
+  .sidebar {
+    background-color: #0f2d28;
+    color: #ffffff;
+  }
+
   .brand-sidebar {
     padding: 18px 20px;
     display: flex;
     align-items: center;
     gap: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     margin-bottom: 8px;
   }
 
@@ -65,6 +81,8 @@
     width: 38px;
     height: 38px;
     border-radius: 10px;
+    background: #d97706;
+    color: #0f2d28;
   }
 
   .brand-sidebar .brand-mark .material-symbols-rounded {
@@ -73,17 +91,17 @@
 
   .brand-sidebar span {
     font-family: 'Fraunces', serif;
-    font-size: 20px;
-    font-weight: 600;
+    font-size: 22px;
+    font-weight: 700;
     letter-spacing: 0.02em;
-    color: var(--ink-900, #1c2320);
+    color: #ffffff;
   }
 
-  /* Organized Navigation Links & Icons */
+  /* High Contrast Navigation Links & Icons */
   #nav-links {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
     padding: 0 12px;
   }
 
@@ -91,37 +109,50 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 14px;
+    padding: 11px 14px;
     border-radius: 8px;
-    color: var(--ink-700, #33403a);
-    font-size: 14.5px;
-    font-weight: 500;
+    color: #e5e7eb;
+    font-size: 15px;
+    font-weight: 600;
     text-decoration: none;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition: all 0.15s ease;
   }
 
   #nav-links a:hover {
-    background: var(--pine-50, #eef4f1);
-    color: var(--pine-700, #1b4b43);
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
   }
 
   #nav-links a.active {
-    background: var(--pine-700, #1b4b43);
-    color: #ffffff;
-    font-weight: 600;
+    background: #d97706;
+    color: #0f2d28;
+    font-weight: 700;
   }
 
   .nav-icon {
-    width: 18px;
-    font-size: 16px;
+    width: 20px;
+    font-size: 18px;
     text-align: center;
     flex-shrink: 0;
-    opacity: 0.85;
+    color: inherit;
   }
 
-  #nav-links a:hover .nav-icon,
-  #nav-links a.active .nav-icon {
-    opacity: 1;
+  /* Form & Labels Contrast Fix */
+  .auth-card p.muted {
+    color: #374151;
+    font-weight: 500;
+  }
+
+  #login-form label {
+    color: #111827;
+    font-weight: 600;
+  }
+
+  .label-icon {
+    color: #1b4b43;
+    font-size: 18px;
+    vertical-align: -3px;
+    margin-right: 4px;
   }
 </style>
 </head>
@@ -132,9 +163,9 @@
     <div class="auth-card">
       <div class="brand">
         <div class="brand-mark">
-          <span class="material-symbols-rounded filled">savings</span>
+          <span class="material-symbols-rounded">savings</span>
         </div>
-        <h1>SACCO Member Portal</h1>
+        <h1 style="color: #0f2d28; font-weight: 700;">SACCO Member Portal</h1>
       </div>
       <p class="muted">Sign in to manage your savings, loans, and shares.</p>
       <form id="login-form">
@@ -142,17 +173,17 @@
           <span class="material-symbols-rounded label-icon">mail</span> Email
           <input type="email" id="login-email" required autocomplete="username" />
         </label>
-        <label>
+        <label style="margin-top: 10px;">
           <span class="material-symbols-rounded label-icon">lock</span> Password
           <input type="password" id="login-password" required autocomplete="current-password" />
         </label>
-        <label style="display:flex;align-items:center;gap:8px;margin-top:6px;margin-bottom:12px;font-size:13px;cursor:pointer;user-select:none;">
+        <label style="display:flex;align-items:center;gap:8px;margin-top:10px;margin-bottom:12px;font-size:14px;cursor:pointer;user-select:none;color:#1f2937;">
           <input type="checkbox" id="login-remember" /> Remember me on this device
         </label>
-        <div style="display:flex; justify-content:flex-end; margin-top:-6px; margin-bottom:12px;">
-          <a href="#" id="forgot-password-link" class="forgot-password-link"><span class="material-symbols-rounded" style="font-size:14px;vertical-align:-2px;margin-right:4px;">refresh</span> Forgot password?</a>
+        <div style="display:flex; justify-content:flex-end; margin-top:-6px; margin-bottom:14px;">
+          <a href="#" id="forgot-password-link" class="forgot-password-link" style="color: #1b4b43; font-weight: 600; text-decoration: none;"><span class="material-symbols-rounded" style="font-size:16px;vertical-align:-3px;margin-right:2px;">refresh</span> Forgot password?</a>
         </div>
-        <button type="submit" class="btn btn-primary btn-block"><span class="material-symbols-rounded" style="font-size:15px;vertical-align:-2px;margin-right:4px;">login</span> Sign in</button>
+        <button type="submit" class="btn btn-primary btn-block" style="font-weight: 600;"><span class="material-symbols-rounded" style="font-size:18px;vertical-align:-3px;margin-right:4px;">login</span> Sign in</button>
         <p id="login-error" class="form-error" hidden></p>
       </form>
     </div>
@@ -163,12 +194,12 @@
     <aside class="sidebar">
       <div class="brand brand-sidebar">
         <div class="brand-mark">
-          <span class="material-symbols-rounded filled">savings</span>
+          <span class="material-symbols-rounded">savings</span>
         </div>
         <span>SACCO</span>
       </div>
       <nav id="nav-links">
-        <a href="#/dashboard" data-route="dashboard">
+        <a href="#/dashboard" data-route="dashboard" class="active">
           <i class="fa-solid fa-gauge-high nav-icon"></i>
           <span>Dashboard</span>
         </a>
@@ -205,14 +236,14 @@
           <span>Profile</span>
         </a>
       </nav>
-      <div class="sidebar-footer">
+      <div class="sidebar-footer" style="padding: 16px; border-top: 1px solid rgba(255,255,255,0.12); margin-top: 12px;">
         <div id="user-chip" class="user-chip"></div>
-        <button id="theme-toggle-btn" class="theme-switch-btn">
+        <button id="theme-toggle-btn" class="theme-switch-btn" style="color: #ffffff; font-weight: 600;">
           <span class="theme-icon"><i class="fa-solid fa-sun"></i></span>
           <span class="theme-label">Light Mode</span>
         </button>
-        <button id="lock-session-btn" class="btn btn-ghost btn-block" style="margin-top:6px; color: var(--brass-500);"><i class="fa-solid fa-shield-halved"></i> Lock Session</button>
-        <button id="logout-btn" class="btn btn-ghost btn-block" style="margin-top:4px;"><i class="fa-solid fa-right-from-bracket"></i> Log out</button>
+        <button id="lock-session-btn" class="btn btn-ghost btn-block" style="margin-top:8px; color: #fbbf24; font-weight: 600;"><i class="fa-solid fa-shield-halved"></i> Lock Session</button>
+        <button id="logout-btn" class="btn btn-ghost btn-block" style="margin-top:6px; color: #ffffff; font-weight: 600;"><i class="fa-solid fa-right-from-bracket"></i> Log out</button>
       </div>
     </aside>
 
@@ -227,7 +258,7 @@
         <h2 id="page-title" class="topbar-title-mobile">Dashboard</h2>
         <div id="connection-indicator" class="conn-badge online">
           <span class="dot"></span>
-          <span class="text">Connected</span>
+          <span class="text" style="font-weight: 600;">Connected</span>
         </div>
       </header>
       <main id="view-root" class="view-root">
@@ -273,14 +304,14 @@
     <div id="chatbot-panel" class="chatbot-panel" hidden>
       <div class="chatbot-header">
         <div style="display:flex;align-items:center;gap:8px;">
-          <i class="fa-solid fa-comment-dots" style="font-size:18px;color:var(--brass-500);"></i>
+          <i class="fa-solid fa-comment-dots" style="font-size:18px;color:#d97706;"></i>
           <span style="font-weight:600;">SACCO Assistant</span>
         </div>
         <button id="chatbot-close" class="chatbot-close-btn"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div id="chatbot-messages" class="chatbot-messages">
         <div class="chat-msg bot-msg">
-          <i class="fa-solid fa-circle-user chat-avatar" style="color: var(--brass-500);"></i>
+          <i class="fa-solid fa-circle-user chat-avatar" style="color: #d97706;"></i>
           <span>Hello! I'm your SACCO virtual assistant. Ask me about your savings, loans, shares, or financial tips! 🌿</span>
         </div>
       </div>
