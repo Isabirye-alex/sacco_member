@@ -51,22 +51,24 @@
     font-size: 26px;
   }
 
-  /* Sidebar specific brand styling */
+  /* Sidebar Brand Header Alignment */
   .brand-sidebar {
-    padding: 16px 20px;
+    padding: 18px 20px;
     display: flex;
     align-items: center;
     gap: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 8px;
   }
 
   .brand-sidebar .brand-mark {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
   }
 
   .brand-sidebar .brand-mark .material-symbols-rounded {
-    font-size: 20px;
+    font-size: 22px;
   }
 
   .brand-sidebar span {
@@ -75,6 +77,51 @@
     font-weight: 600;
     letter-spacing: 0.02em;
     color: var(--ink-900, #1c2320);
+  }
+
+  /* Organized Navigation Links & Icons */
+  #nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 12px;
+  }
+
+  #nav-links a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: var(--ink-700, #33403a);
+    font-size: 14.5px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+
+  #nav-links a:hover {
+    background: var(--pine-50, #eef4f1);
+    color: var(--pine-700, #1b4b43);
+  }
+
+  #nav-links a.active {
+    background: var(--pine-700, #1b4b43);
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  .nav-icon {
+    width: 18px;
+    font-size: 16px;
+    text-align: center;
+    flex-shrink: 0;
+    opacity: 0.85;
+  }
+
+  #nav-links a:hover .nav-icon,
+  #nav-links a.active .nav-icon {
+    opacity: 1;
   }
 </style>
 </head>
@@ -121,15 +168,42 @@
         <span>SACCO</span>
       </div>
       <nav id="nav-links">
-        <a href="#/dashboard" data-route="dashboard"><i class="fa-solid fa-gauge-high nav-icon"></i>Dashboard</a>
-        <a href="#/savings" data-route="savings"><i class="fa-solid fa-vault nav-icon"></i>Savings</a>
-        <a href="#/loans" data-route="loans"><i class="fa-solid fa-hand-holding-dollar nav-icon"></i>Loans</a>
-        <a href="#/shares" data-route="shares"><i class="fa-solid fa-chart-pie nav-icon"></i>Shares</a>
-        <a href="#/groups" data-route="groups"><i class="fa-solid fa-people-group nav-icon"></i>Groups</a>
-        <a href="#/notifications" data-route="notifications"><i class="fa-solid fa-bell nav-icon"></i>Notifications</a>
-        <a href="#/tools" data-route="tools"><i class="fa-solid fa-screwdriver-wrench nav-icon"></i>Member Tools</a>
-        <a href="#/referrals" data-route="referrals"><i class="fa-solid fa-user-plus nav-icon"></i>Invite &amp; Earn</a>
-        <a href="#/profile" data-route="profile"><i class="fa-solid fa-circle-user nav-icon"></i>Profile</a>
+        <a href="#/dashboard" data-route="dashboard">
+          <i class="fa-solid fa-gauge-high nav-icon"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#/savings" data-route="savings">
+          <i class="fa-solid fa-vault nav-icon"></i>
+          <span>Savings</span>
+        </a>
+        <a href="#/loans" data-route="loans">
+          <i class="fa-solid fa-hand-holding-dollar nav-icon"></i>
+          <span>Loans</span>
+        </a>
+        <a href="#/shares" data-route="shares">
+          <i class="fa-solid fa-chart-pie nav-icon"></i>
+          <span>Shares</span>
+        </a>
+        <a href="#/groups" data-route="groups">
+          <i class="fa-solid fa-people-group nav-icon"></i>
+          <span>Groups</span>
+        </a>
+        <a href="#/notifications" data-route="notifications">
+          <i class="fa-solid fa-bell nav-icon"></i>
+          <span>Notifications</span>
+        </a>
+        <a href="#/tools" data-route="tools">
+          <i class="fa-solid fa-screwdriver-wrench nav-icon"></i>
+          <span>Member Tools</span>
+        </a>
+        <a href="#/referrals" data-route="referrals">
+          <i class="fa-solid fa-user-plus nav-icon"></i>
+          <span>Invite &amp; Earn</span>
+        </a>
+        <a href="#/profile" data-route="profile">
+          <i class="fa-solid fa-circle-user nav-icon"></i>
+          <span>Profile</span>
+        </a>
       </nav>
       <div class="sidebar-footer">
         <div id="user-chip" class="user-chip"></div>
